@@ -1,0 +1,16 @@
+{
+  "name": "Signal — pedal finder & board planner",
+  "short_name": "Signal",
+  "description": "Find guitar pedals that fit your amp, your ears and your budget, then lay them out on a board.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14070d",
+  "theme_color": "#14070d",
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
+}

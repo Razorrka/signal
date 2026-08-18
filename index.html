@@ -1,0 +1,1267 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14070d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Signal">
+<meta name="description" content="Pedal finder and board planner — tells you what fits your amp, your ears and your budget.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>Signal — pedal finder &amp; board planner</title>
+<style>/* ============ THEME ==================================================== */
+:root{
+  --bg:#14070d; --bg2:#25101b; --panel:rgba(255,255,255,.028);
+  --line:rgba(255,180,200,.14); --line2:rgba(255,180,200,.07);
+  --ink:#f7ebef; --dim:#bb8fa0; --faint:#7a5866;
+  --acc:#ff8fb0; --acc2:#ffa25c; --good:#6fd39a; --warn:#ffb454; --bad:#ff7a7a;
+  --grad:linear-gradient(100deg,#ff8fb0 0%,#ff7e8f 40%,#ffa25c 100%);
+}
+html[data-t="midnight"]{
+  --bg:#07090c; --bg2:#0d1218; --panel:rgba(255,255,255,.026);
+  --line:rgba(150,190,235,.14); --line2:rgba(150,190,235,.07);
+  --ink:#e8eef5; --dim:#8296ab; --faint:#4d5c6b;
+  --acc:#77b0ff; --acc2:#8fd8e8; --good:#5fcf9a; --warn:#e8b25c; --bad:#f08585;
+  --grad:linear-gradient(100deg,#77b0ff,#8fd8e8);
+}
+html[data-t="ember"]{
+  --bg:#100b06; --bg2:#1d1408; --panel:rgba(255,255,255,.03);
+  --line:rgba(255,205,150,.15); --line2:rgba(255,205,150,.07);
+  --ink:#f6ecdd; --dim:#bb9a76; --faint:#7a6448;
+  --acc:#ffb454; --acc2:#ff7d47; --good:#84cf7a; --warn:#ffc861; --bad:#ff8168;
+  --grad:linear-gradient(100deg,#ffc861,#ff7d47);
+}
+html[data-t="mono"]{
+  --bg:#0a0a0a; --bg2:#121212; --panel:rgba(255,255,255,.03);
+  --line:rgba(255,255,255,.14); --line2:rgba(255,255,255,.06);
+  --ink:#ededed; --dim:#8e8e8e; --faint:#565656;
+  --acc:#ffffff; --acc2:#c9c9c9; --good:#a8d8a8; --warn:#e0c98a; --bad:#e89a9a;
+  --grad:linear-gradient(100deg,#ffffff,#a8a8a8);
+}
+html[data-t="paper"]{
+  --bg:#f6f2ec; --bg2:#efe8de; --panel:rgba(60,40,30,.035);
+  --line:rgba(80,55,40,.18); --line2:rgba(80,55,40,.08);
+  --ink:#231b16; --dim:#6d5c4e; --faint:#9d8b7c;
+  --acc:#c2436b; --acc2:#cf6a26; --good:#2f8a5c; --warn:#a8720f; --bad:#b83a3a;
+  --grad:linear-gradient(100deg,#c2436b,#cf6a26);
+}
+
+/* ============ BASE ===================================================== */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(120% 70% at 50% -10%,var(--bg2) 0%,var(--bg) 62%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding:0 0 96px;
+  padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right);
+  overflow-x:hidden;
+}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,"SF Mono",monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+a{color:var(--acc)}
+::selection{background:var(--acc);color:var(--bg)}
+
+/* ============ HEADER =================================================== */
+header{
+  position:sticky;top:0;z-index:60;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);
+  border-bottom:1px solid var(--line2);
+  padding-top:env(safe-area-inset-top);
+}
+.hrow{display:flex;align-items:center;gap:16px;height:56px}
+.mark{
+  font-weight:800;font-size:19px;letter-spacing:.30em;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  transform:skewX(-9deg);transform-origin:left center;
+  padding-right:.3em;white-space:nowrap;
+}
+.tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);
+  border-left:1px solid var(--line);padding-left:14px;white-space:nowrap}
+.spacer{flex:1}
+.swatches{display:flex;gap:7px}
+.sw{width:17px;height:17px;border-radius:50%;border:1px solid var(--line);
+  transition:transform .16s,box-shadow .16s;flex:none}
+.sw[aria-pressed="true"]{transform:scale(1.24);box-shadow:0 0 0 1.5px var(--acc)}
+.sw:hover{transform:scale(1.16)}
+
+/* tabs */
+nav{display:flex;gap:2px;border-top:1px solid var(--line2);overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.tb{
+  padding:11px 0;margin-right:26px;font-size:11px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--faint);border-bottom:1.5px solid transparent;white-space:nowrap;transition:color .15s;
+}
+.tb:hover{color:var(--dim)}
+.tb[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+
+/* ============ SHARED BITS ============================================= */
+.lbl{font-size:9.5px;letter-spacing:.19em;text-transform:uppercase;color:var(--faint)}
+.sec{margin:34px 0 0}
+.sec > .lbl{padding-bottom:9px;border-bottom:1px solid var(--line2);margin-bottom:16px;
+  display:flex;align-items:baseline;gap:12px}
+.sec > .lbl .r{margin-left:auto;color:var(--dim);letter-spacing:.06em;text-transform:none;font-size:11px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  padding:5.5px 11px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;
+  color:var(--dim);transition:.14s;line-height:1.3;
+}
+.chip:hover{color:var(--ink);border-color:var(--dim)}
+.chip[aria-pressed="true"]{background:var(--grad);color:#1a0a10;border-color:transparent;font-weight:600}
+html[data-t="paper"] .chip[aria-pressed="true"]{color:#fff}
+.chip .sub{opacity:.6;font-size:11px}
+.tgrp{margin-bottom:14px}
+.tgrp .gl{font-size:9.5px;letter-spacing:.19em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.hint{color:var(--dim);font-size:13px;line-height:1.6}
+.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+/* ============ PRICE ==================================================== */
+.pricebox{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.pfield{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:8px;padding:7px 11px}
+.pfield span{color:var(--faint);font-size:12px}
+.pfield input{width:66px;background:none;border:0;outline:none;font-family:ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums;font-size:15px;color:var(--ink)}
+.dual{position:relative;flex:1;min-width:220px;height:26px}
+.dual .track{position:absolute;left:0;right:0;top:12px;height:2px;background:var(--line);border-radius:2px}
+.dual .fill{position:absolute;top:12px;height:2px;background:var(--grad);border-radius:2px}
+.dual input[type=range]{
+  position:absolute;left:0;width:100%;top:0;height:26px;margin:0;
+  -webkit-appearance:none;appearance:none;background:none;pointer-events:none;
+}
+.dual input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;pointer-events:auto;width:15px;height:15px;border-radius:50%;
+  background:var(--ink);border:2px solid var(--bg);cursor:grab;box-shadow:0 0 0 1px var(--acc)
+}
+.dual input[type=range]::-moz-range-thumb{
+  pointer-events:auto;width:15px;height:15px;border-radius:50%;background:var(--ink);
+  border:2px solid var(--bg);cursor:grab;box-shadow:0 0 0 1px var(--acc)
+}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{padding:6px 13px;font-size:11.5px;color:var(--faint);letter-spacing:.04em}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink)}
+
+/* ============ TOP RESULT ============================================== */
+.hero{
+  margin-top:26px;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,var(--panel),transparent 70%);
+}
+.hero-in{display:flex;gap:26px;padding:24px;align-items:flex-start;flex-wrap:wrap}
+.hero-art{flex:none;width:150px;display:flex;align-items:center;justify-content:center}
+.hero-art svg{width:100%;height:auto;max-height:210px;filter:drop-shadow(0 10px 26px rgba(0,0,0,.45))}
+.hero-body{flex:1;min-width:260px}
+.hero .rankline{display:flex;align-items:baseline;gap:11px;margin-bottom:5px}
+.hero .best{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc)}
+.hero h2{margin:0;font-size:31px;line-height:1.12;letter-spacing:-.022em;font-weight:700}
+.hero .brand{color:var(--dim);font-size:14px;margin-top:3px}
+.hero .desc{margin:15px 0 0;font-size:14.5px;line-height:1.62;color:var(--ink);opacity:.9;max-width:62ch}
+.metarow{display:flex;gap:26px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--line2)}
+.meta .lbl{margin-bottom:3px}
+.meta .v{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;font-size:19px}
+.meta .v small{font-size:11px;color:var(--faint);margin-left:2px}
+.notes{margin-top:18px;display:flex;flex-direction:column;gap:9px}
+.note{display:flex;gap:10px;font-size:13.4px;line-height:1.55;color:var(--dim)}
+.note b{flex:none;width:3px;border-radius:2px;background:var(--dim);align-self:stretch}
+.note.good b{background:var(--good)} .note.good{color:var(--ink)}
+.note.warn b{background:var(--warn)}
+.note.info b{background:var(--faint)}
+
+/* ============ RESULT LIST ============================================= */
+.rows{margin-top:8px}
+.row{
+  display:flex;align-items:center;gap:14px;padding:12px 4px;
+  border-bottom:1px solid var(--line2);transition:background .13s;
+}
+.row:hover{background:var(--panel)}
+.row .rk{width:24px;text-align:right;color:var(--faint);font-family:ui-monospace,Menlo,monospace;font-size:12px;flex:none}
+.row .art{width:30px;flex:none;display:flex;justify-content:center}
+.row .art svg{width:100%;height:auto;max-height:44px}
+.row .nm{flex:1;min-width:0}
+.row .nm .t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .nm .s{font-size:11.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .ct{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);
+  flex:none;width:104px;text-align:right}
+.row .pr{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;font-size:14px;
+  width:64px;text-align:right;flex:none}
+.row .mt{width:82px;flex:none;text-align:right;font-family:ui-monospace,Menlo,monospace;
+  font-size:11px;color:var(--faint);white-space:nowrap;letter-spacing:.02em}
+.row .add{flex:none;width:26px;height:26px;border:1px solid var(--line);border-radius:7px;
+  color:var(--faint);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+.row .add:hover{color:var(--ink);border-color:var(--acc)}
+.row .add.on{background:var(--grad);color:#1a0a10;border-color:transparent}
+.row.open{background:var(--panel)}
+.detail{padding:2px 4px 20px 72px;border-bottom:1px solid var(--line2);background:var(--panel)}
+.detail .desc{font-size:13.6px;color:var(--dim);line-height:1.62;max-width:70ch;margin-bottom:12px}
+.empty{padding:56px 0;text-align:center;color:var(--faint);font-size:14px}
+.empty b{display:block;color:var(--dim);font-size:16px;margin-bottom:7px;font-weight:500}
+
+/* ============ BOARD =================================================== */
+.boardwrap{margin-top:20px;border:1px solid var(--line);border-radius:14px;padding:20px;overflow-x:auto}
+.boardwrap svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.stats{display:flex;gap:0;flex-wrap:wrap;margin-top:22px;border-top:1px solid var(--line2)}
+.stat{flex:1;min-width:118px;padding:15px 16px 15px 0}
+.stat .v{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:25px;line-height:1.1;margin-top:5px}
+.stat .v.ok{color:var(--good)} .stat .v.no{color:var(--bad)}
+.stat .v small{font-size:11px;color:var(--faint);margin-left:2px}
+.chainlist{margin-top:6px}
+.crow{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--line2)}
+.crow .pos{width:20px;color:var(--faint);font-family:ui-monospace,Menlo,monospace;font-size:11px;flex:none}
+.crow .sw2{width:11px;height:11px;border-radius:3px;flex:none;border:1px solid rgba(255,255,255,.18)}
+.crow .n{flex:1;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .c2{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);flex:none}
+.crow .x{color:var(--faint);font-size:16px;padding:0 5px;flex:none}
+.crow .x:hover{color:var(--bad)}
+select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;
+  font-size:13.5px;outline:none;max-width:100%}
+.btn{border:1px solid var(--line);border-radius:8px;padding:8px 15px;font-size:12.5px;color:var(--dim);transition:.14s}
+.btn:hover{color:var(--ink);border-color:var(--dim)}
+.btn.pri{background:var(--grad);color:#1a0a10;border-color:transparent;font-weight:600}
+html[data-t="paper"] .btn.pri{color:#fff}
+
+/* ============ LEARN / GEAR ============================================ */
+.card{border:1px solid var(--line2);border-radius:12px;padding:17px 19px;margin-bottom:11px;background:var(--panel)}
+.card h3{margin:0 0 5px;font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.card p{margin:0;color:var(--dim);font-size:13.6px;line-height:1.62}
+.card .pos2{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--faint);
+  float:right;letter-spacing:.08em}
+.ampgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:4px}
+.amp{border:1px solid var(--line2);border-radius:11px;padding:14px 15px;text-align:left;transition:.14s;
+  display:block;width:100%}
+.amp:hover{border-color:var(--dim)}
+.amp[aria-pressed="true"]{border-color:var(--acc);background:var(--panel)}
+.amp .an{font-size:14.5px;margin-bottom:2px}
+.amp .ab{font-size:11px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase}
+.amp .ad{font-size:12.4px;color:var(--dim);margin-top:8px;line-height:1.5}
+.amp .specs{display:flex;gap:9px;flex-wrap:wrap;margin-top:9px}
+.amp .specs span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+  border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
+.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line2);color:var(--faint);
+  font-size:11.5px;line-height:1.75}
+@media(max-width:640px){
+  .wrap{padding:0 15px}
+  .sec > .lbl{flex-wrap:wrap}
+  .sec > .lbl .r{margin-left:0;width:100%;padding-top:5px}
+  .hero h2{font-size:25px}
+  .hero-in{padding:18px;gap:18px}
+  .hero-art{width:104px;margin:0 auto}
+  .row .ct{display:none} .row .mt{display:none}
+  .tag{display:none}
+  .detail{padding-left:20px}
+}
+</style>
+<header>
+  <div class="wrap hrow">
+    <div class="mark">SIGNAL</div>
+    <div class="tag">pedal finder &amp; board planner</div>
+    <div class="spacer"></div>
+    <div class="swatches" id="swatches"></div>
+  </div>
+  <div class="wrap"><nav id="nav"></nav></div>
+</header>
+<main class="wrap" id="main"></main>
+<div class="wrap"><div class="foot">
+  Prices are approximate street prices in USD as of August 2026 and drift constantly — treat them as a bracket, not a quote.
+  Nothing here is affiliated with or endorsed by any manufacturer, and no listing is sponsored.
+  Enclosure drawings are illustrations at true relative scale, not product photographs.
+</div></div>
+<script>/* ---- PEDAL DB -------------------------------------------------------------
+   p  = approx street price NEW, USD, Aug 2026 (estimates, they drift)
+   u  = rough used price
+   s  = enclosure size key
+   ma = typical current draw (mA) — category typicals where not published
+   g  = gain amount 0-10 (dirt pedals)
+   lo = low end: 'tight' | 'neutral' | 'huge'
+   br = brightness -2..2
+   aib= amp-in-a-box (makes its own voice, good into a clean amp)
+   psh= designed to push an amp that already breaks up
+--------------------------------------------------------------------------- */
+const PEDALS = [
+/* ── TUNERS ───────────────────────────────────────────────────────────── */
+{i:'tu3',n:'TU-3 Chromatic Tuner',b:'Boss',c:'tuner',p:110,u:65,s:'boss',ma:55,col:'#3b4a5a',k:0,
+ tags:['essential'],d:'The default pedal tuner. Bright display, mutes while you tune, survives anything.'},
+{i:'polytune3',n:'Polytune 3',b:'TC Electronic',c:'tuner',p:110,u:70,s:'std',ma:100,col:'#2b2f36',k:0,
+ tags:['essential'],d:'Strum all six strings and see which are off at once. Has a built-in buffer for long cable runs.'},
+{i:'pitchblack',n:'Pitchblack X',b:'Korg',c:'tuner',p:80,u:45,s:'std',ma:50,col:'#1e1e20',k:0,
+ tags:['essential','budget'],d:'Cheap, accurate, very readable. Does one job.'},
+{i:'ddtuner',n:'Chromatic Pedal Tuner',b:"D'Addario",c:'tuner',p:80,u:45,s:'mini',ma:35,col:'#26262a',k:0,
+ tags:['essential','budget','small'],d:'Mini footprint tuner for when board space is the constraint.'},
+
+/* ── COMPRESSORS ──────────────────────────────────────────────────────── */
+{i:'dynacomp',n:'Dyna Comp',b:'MXR',c:'comp',p:110,u:70,s:'std',ma:5,col:'#c0392b',k:2,
+ tags:['squishy','vintage','punchy','sustaining'],
+ d:'The classic squish. Adds obvious pop and sustain — you hear it working, which is the point.'},
+{i:'keeleycomp',n:'Compressor Plus',b:'Keeley',c:'comp',p:170,u:115,s:'std',ma:10,col:'#d8d8d0',k:4,
+ tags:['smooth','transparent','sustaining','subtle'],
+ d:'Smooth and mostly invisible. Evens out your picking without announcing itself.'},
+{i:'cs3',n:'CS-3 Compression Sustainer',b:'Boss',c:'comp',p:110,u:65,s:'boss',ma:12,col:'#2f6ba8',k:4,
+ tags:['punchy','sustaining','vintage'],d:'Aggressive, a bit noisy, very effective at gluing a clean tone together.'},
+{i:'ego',n:'Ego 76 Compressor',b:'Wampler',c:'comp',p:200,u:140,s:'std',ma:26,col:'#1f2a36',k:4,
+ tags:['smooth','transparent','sustaining','punchy'],
+ d:'Studio-style compression with a blend knob so you keep your attack while adding sustain underneath.'},
+{i:'spcomp',n:'SP Compressor',b:'Xotic',c:'comp',p:180,u:120,s:'mini',ma:10,col:'#e8e4d8',k:3,
+ tags:['smooth','transparent','small','subtle'],d:'Tiny, clean, blendable. A set-and-forget always-on compressor.'},
+{i:'whitey',n:'Whitey Tighty',b:'JHS',c:'comp',p:99,u:70,s:'mini',ma:20,col:'#f0f0ee',k:2,
+ tags:['punchy','squishy','small','budget'],d:'Mini FET compressor. Snappy and forward, good for funk and clean picking.'},
+
+/* ── BOOST / EQ ───────────────────────────────────────────────────────── */
+{i:'epboost',n:'EP Booster',b:'Xotic',c:'boost',p:140,u:95,s:'mini',ma:5,col:'#d9d3c4',k:1,g:1,lo:'neutral',br:1,psh:1,
+ tags:['warm','vintage','subtle','small','glassy'],
+ d:'Adds a little sparkle and thickness even at zero. Famous as an always-on "makes everything better" pedal.'},
+{i:'microamp',n:'Micro Amp',b:'MXR',c:'boost',p:90,u:55,s:'std',ma:2,col:'#e6e6e6',k:1,g:1,lo:'neutral',br:0,psh:1,
+ tags:['transparent','subtle','budget'],d:'One knob, louder. No tone change — pure level for solos.'},
+{i:'ge7',n:'GE-7 Equalizer',b:'Boss',c:'eq',p:130,u:80,s:'boss',ma:20,col:'#c8c8cc',k:8,
+ tags:['transparent','subtle'],
+ d:'Seven sliders to fix what your amp is doing wrong. Unglamorous and one of the most genuinely useful pedals there is.'},
+{i:'sparkboost',n:'Spark Booster',b:'TC Electronic',c:'boost',p:130,u:80,s:'std',ma:35,col:'#b03a3a',k:4,g:3,lo:'neutral',br:0,psh:1,
+ tags:['warm','crunchy','punchy','budget'],d:'Boost with real tone controls and enough gain to grit up on its own.'},
+{i:'soulfood',n:'Soul Food',b:'Electro-Harmonix',c:'boost',p:90,u:55,s:'std',ma:26,col:'#c9ccd1',k:3,g:3,lo:'tight',br:1,psh:1,aib:0,
+ tags:['transparent','glassy','tight','budget','punchy'],
+ d:'Cheap Klon-style transparent drive. Keeps your amp sound, adds tightness and volume.'},
+{i:'prestige',n:'Prestige',b:'JHS',c:'boost',p:180,u:125,s:'mini',ma:20,col:'#2a2a2e',k:2,g:2,lo:'neutral',br:1,psh:1,
+ tags:['glassy','subtle','small','transparent'],d:'Buffer plus a light lift. Makes a dull rig feel more present without sounding like an effect.'},
+
+/* ── OVERDRIVE ────────────────────────────────────────────────────────── */
+{i:'ts9',n:'Tube Screamer TS9',b:'Ibanez',c:'od',p:110,u:70,s:'std',ma:8,col:'#3f8f45',k:3,g:4,lo:'tight',br:0,psh:1,aib:0,
+ tags:['warm','crunchy','tight','vintage','smooth'],
+ d:'The reference overdrive. Cuts bass, pushes mids, tightens everything — built to shove a tube amp harder.'},
+{i:'tsmini',n:'Tube Screamer Mini',b:'Ibanez',c:'od',p:100,u:65,s:'mini',ma:8,col:'#3f8f45',k:3,g:4,lo:'tight',br:0,psh:1,
+ tags:['warm','crunchy','tight','vintage','small'],d:'The TS circuit in a tiny box, same voice, less floor space.'},
+{i:'plumes',n:'Plumes',b:'EarthQuaker Devices',c:'od',p:99,u:70,s:'std',ma:20,col:'#6b4ea8',k:3,g:4,lo:'neutral',br:1,psh:1,aib:0,
+ tags:['transparent','crunchy','glassy','punchy','budget'],
+ d:'Screamer-style but with the mid-hump dialled back and three clipping voices. Best value overdrive on the market right now.'},
+{i:'bd2',n:'BD-2 Blues Driver',b:'Boss',c:'od',p:110,u:65,s:'boss',ma:16,col:'#2e6fb7',k:3,g:5,lo:'neutral',br:2,psh:1,aib:1,
+ tags:['gritty','crunchy','bright','vintage','punchy'],
+ d:'Open, hairy and responsive to pick attack. Brighter and rawer than a Screamer — some love it, some find it fizzy.'},
+{i:'sd1',n:'SD-1 Super Overdrive',b:'Boss',c:'od',p:70,u:40,s:'boss',ma:10,col:'#e8c341',k:3,g:4,lo:'tight',br:0,psh:1,
+ tags:['warm','crunchy','tight','vintage','budget'],d:'A Screamer with asymmetric clipping, for half the price. Enormously common for a reason.'},
+{i:'od3',n:'OD-3 OverDrive',b:'Boss',c:'od',p:110,u:65,s:'boss',ma:20,col:'#e0932e',k:3,g:5,lo:'neutral',br:0,psh:1,aib:1,
+ tags:['warm','smooth','crunchy','sustaining'],d:'Thicker and more amp-like than the SD-1, holds low end instead of scooping it.'},
+{i:'ocd',n:'OCD',b:'Fulltone',c:'od',p:130,u:85,s:'std',ma:12,col:'#f2f2f2',k:3,g:6,lo:'neutral',br:1,psh:1,aib:1,
+ tags:['gritty','crunchy','punchy','sustaining'],
+ d:'Overdrive that behaves like a cranked amp. HP/LP switch takes it from light crunch to near-distortion.'},
+{i:'morningglory',n:'Morning Glory V4',b:'JHS',c:'od',p:200,u:140,s:'std',ma:20,col:'#e9e4d6',k:4,g:3,lo:'neutral',br:1,psh:1,aib:0,
+ tags:['transparent','smooth','glassy','subtle'],
+ d:'Very low-gain and very transparent. Adds edge and volume while leaving your amp and guitar recognisable.'},
+{i:'tumnus',n:'Tumnus',b:'Wampler',c:'od',p:150,u:105,s:'mini',ma:12,col:'#c8a13a',k:3,g:3,lo:'tight',br:1,psh:1,
+ tags:['transparent','warm','tight','small','glassy'],d:'Klon-style mid-forward boost in a mini box. Thickens without muddying.'},
+{i:'odr1',n:'ODR-1 Natural Overdrive',b:'Nobels',c:'od',p:80,u:50,s:'std',ma:10,col:'#3aa0a8',k:3,g:4,lo:'neutral',br:0,psh:1,aib:0,
+ tags:['transparent','warm','punchy','budget','smooth'],
+ d:'Full-range drive that does not scoop your bass or spike your mids. Nashville session staple and unusually kind to solid-state amps.'},
+{i:'westwood',n:'Westwood',b:'EarthQuaker Devices',c:'od',p:150,u:105,s:'std',ma:22,col:'#2f6d8c',k:4,g:5,lo:'neutral',br:1,psh:1,aib:1,
+ tags:['punchy','crunchy','bright','sustaining'],d:'Loud, full-bodied drive with real bass and treble controls. Good at being the only dirt on a board.'},
+{i:'385',n:'385 Overdrive',b:'Walrus Audio',c:'od',p:200,u:140,s:'std',ma:20,col:'#4a4136',k:3,g:5,lo:'neutral',br:-1,psh:1,aib:1,
+ tags:['warm','vintage','gritty','dark','smooth'],d:'Based on an old film projector amp. Warm, slightly compressed, characterful rather than clean.'},
+{i:'timmy',n:'Timmy Overdrive',b:'MXR',c:'od',p:130,u:90,s:'mini',ma:5,col:'#d8dde0',k:4,g:3,lo:'neutral',br:0,psh:1,aib:0,
+ tags:['transparent','subtle','small','smooth'],
+ d:'The transparent-overdrive benchmark, officially miniaturised. Independent bass/treble cut so it never gets flabby.'},
+{i:'bonsai',n:'Bonsai',b:'JHS',c:'od',p:250,u:180,s:'std',ma:20,col:'#2f7a3f',k:4,g:4,lo:'tight',br:0,psh:1,
+ tags:['warm','crunchy','vintage','tight'],d:'Nine different Tube Screamer variants in one box. A history lesson if you want to learn what the fuss is about.'},
+{i:'joyoultimate',n:'Ultimate Drive',b:'Joyo',c:'od',p:45,u:30,s:'std',ma:15,col:'#e2a32c',k:3,g:6,lo:'neutral',br:1,psh:1,aib:1,
+ tags:['gritty','crunchy','budget','punchy'],d:'Openly an OCD clone at a third of the price. Build is fine, tone is genuinely close.'},
+{i:'joyovintage',n:'Vintage Overdrive',b:'Joyo',c:'od',p:45,u:30,s:'std',ma:15,col:'#3f8f45',k:3,g:4,lo:'tight',br:0,psh:1,
+ tags:['warm','crunchy','vintage','budget','tight'],d:'Screamer clone for the price of a set of strings. Fine first overdrive.'},
+{i:'to800',n:'TO800 Vintage Tube Overdrive',b:'Behringer',c:'od',p:30,u:20,s:'std',ma:10,col:'#4aa04a',k:3,g:4,lo:'tight',br:0,psh:1,
+ tags:['budget','warm','crunchy','vintage'],
+ d:'The cheapest way into a Screamer sound. Plastic enclosure — sounds better than it feels, do not stomp it angrily.'},
+];
+
+PEDALS.push(
+/* ── DISTORTION ───────────────────────────────────────────────────────── */
+{i:'rat2',n:'RAT 2',b:'ProCo',c:'dist',p:100,u:65,s:'std',ma:10,col:'#1c1c1e',k:3,g:7,lo:'neutral',br:1,aib:1,psh:1,
+ tags:['gritty','crunchy','punchy','vintage','sustaining'],
+ d:'Sits between overdrive and distortion and does both. The filter knob is a treble cut — roll it back and it gets thick and dark.'},
+{i:'ds1',n:'DS-1 Distortion',b:'Boss',c:'dist',p:60,u:35,s:'boss',ma:6,col:'#f08a1e',k:3,g:7,lo:'tight',br:2,aib:1,
+ tags:['bright','gritty','budget','crunchy'],
+ d:'Raw, bright, scooped and everywhere. Cheap enough to be a first distortion; harsh into a solid-state amp unless you tame the tone knob.'},
+{i:'distplus',n:'Distortion+',b:'MXR',c:'dist',p:90,u:55,s:'std',ma:5,col:'#e8c341',k:2,g:6,lo:'neutral',br:1,aib:1,
+ tags:['vintage','gritty','smooth','budget'],d:'Soft, fizzy, 70s distortion with just output and distortion knobs. Simple and characterful.'},
+{i:'hm2w',n:'HM-2W Heavy Metal',b:'Boss',c:'dist',p:150,u:110,s:'boss',ma:20,col:'#2c2f38',k:4,g:9,lo:'huge',br:1,aib:1,
+ tags:['extreme','huge','gritty','dark'],d:'The chainsaw. All knobs right is an actual genre. Enormous low end — it will destroy a small speaker.'},
+{i:'sovereign',n:'Sovereign',b:'Wampler',c:'dist',p:200,u:140,s:'std',ma:25,col:'#c8a13a',k:4,g:7,lo:'neutral',br:0,aib:1,
+ tags:['smooth','sustaining','crunchy','punchy'],d:'Flexible mid-gain distortion with a genuinely useful mid-contour switch.'},
+{i:'riot',n:'Riot Distortion',b:'Suhr',c:'dist',p:200,u:145,s:'std',ma:20,col:'#a52a2a',k:4,g:8,lo:'tight',br:0,aib:1,
+ tags:['tight','sustaining','modern','smooth'],d:'Tight, saturated, amp-like high gain that stays articulate under fast picking.'},
+{i:'beod',n:'BE-OD',b:'Friedman',c:'dist',p:230,u:165,s:'std',ma:25,col:'#1f1f22',k:5,g:8,lo:'neutral',br:0,aib:1,
+ tags:['modern','sustaining','punchy','tight'],d:'A hot-rodded Marshall stack in a box. Makes a clean amp sound like a much bigger, angrier amp.'},
+{i:'morpher',n:'Morpher Distortion',b:'Donner',c:'dist',p:40,u:25,s:'mini',ma:15,col:'#c8382f',k:3,g:7,lo:'neutral',br:1,aib:1,
+ tags:['budget','gritty','small','crunchy'],d:'Three distortion modes, mini box, throwaway price. A fine way to find out what you like before spending.'},
+
+/* ── FUZZ ─────────────────────────────────────────────────────────────── */
+{i:'bigmuff',n:'Big Muff Pi',b:'Electro-Harmonix',c:'fuzz',p:110,u:70,s:'bigbox',ma:3,col:'#1a1a1c',k:3,g:9,lo:'huge',br:0,aib:1,
+ tags:['huge','fuzzy','sustaining','dark','extreme'],
+ d:'Enormous scooped wall of sustain. Famously disappears in a band mix and famously nobody cares.'},
+{i:'nanomuff',n:'Nano Big Muff Pi',b:'Electro-Harmonix',c:'fuzz',p:85,u:55,s:'std',ma:3,col:'#1a1a1c',k:3,g:9,lo:'huge',br:0,aib:1,
+ tags:['huge','fuzzy','sustaining','dark','budget'],d:'Same wall of fuzz, board-friendly box, cheaper.'},
+{i:'greenrussian',n:'Green Russian Big Muff',b:'Electro-Harmonix',c:'fuzz',p:115,u:80,s:'std',ma:3,col:'#3f6b3f',k:3,g:9,lo:'huge',br:-1,aib:1,
+ tags:['huge','fuzzy','dark','sustaining','vintage'],d:'The darker, fatter, less fizzy Muff. More low-mid, less ice-pick.'},
+{i:'opampmuff',n:'Op-Amp Big Muff',b:'Electro-Harmonix',c:'fuzz',p:130,u:90,s:'std',ma:5,col:'#c8c8cc',k:3,g:9,lo:'huge',br:2,aib:1,
+ tags:['fuzzy','bright','extreme','huge'],d:'The Smashing Pumpkins one. Nastier and more midrangey than a standard Muff.'},
+{i:'ffsilicon',n:'Fuzz Face Mini Silicon',b:'Dunlop',c:'fuzz',p:130,u:90,s:'mini',ma:5,col:'#2f5fa8',k:2,g:8,lo:'neutral',br:1,aib:1,
+ tags:['fuzzy','vintage','gritty','sustaining','small'],
+ d:'Cleans up dramatically when you roll your guitar volume down. Wants to plug straight into your guitar — buffers upstream make it choke.'},
+{i:'ffgerm',n:'Fuzz Face Mini Germanium',b:'Dunlop',c:'fuzz',p:180,u:130,s:'mini',ma:5,col:'#c8382f',k:2,g:7,lo:'neutral',br:-1,aib:1,
+ tags:['fuzzy','vintage','warm','dark','smooth','small'],d:'Softer, warmer, woollier than the silicon. Temperature-sensitive and a bit temperamental, which is part of the deal.'},
+{i:'fuzzfactory',n:'Fuzz Factory',b:'ZVEX',c:'fuzz',p:200,u:150,s:'std',ma:5,col:'#e8e0c8',k:5,g:9,lo:'neutral',br:1,aib:1,
+ tags:['broken','extreme','fuzzy','lofi','gritty'],
+ d:'Self-oscillating, gated, sputtery and barely controllable on purpose. Not a "good tone" pedal — a texture machine.'},
+{i:'hizumitas',n:'Hizumitas',b:'EarthQuaker Devices',c:'fuzz',p:200,u:145,s:'std',ma:15,col:'#c0447a',k:3,g:9,lo:'huge',br:-1,aib:1,
+ tags:['huge','fuzzy','dark','sustaining','smooth'],d:'Thick Japanese-style fuzz with endless sustain and a fat low end. Heavy without being brittle.'},
+{i:'muffuletta',n:'Muffuletta',b:'JHS',c:'fuzz',p:250,u:180,s:'std',ma:20,col:'#d8d8dc',k:5,g:9,lo:'huge',br:0,aib:1,
+ tags:['huge','fuzzy','sustaining','vintage'],d:'Six eras of Big Muff in one box, plus a JHS voice. Settles the "which Muff" argument by owning all of them.'},
+{i:'fuzzwar',n:'Fuzz War',b:'Death By Audio',c:'fuzz',p:200,u:150,s:'wide',ma:10,col:'#8b1a1a',k:3,g:10,lo:'huge',br:0,aib:1,
+ tags:['extreme','broken','huge','fuzzy','lofi'],d:'Total annihilation. Barely a guitar sound at high settings, which is the entire appeal.'},
+{i:'sf300',n:'SF300 Super Fuzz',b:'Behringer',c:'fuzz',p:35,u:22,s:'std',ma:10,col:'#e07c2f',k:3,g:9,lo:'huge',br:1,aib:1,
+ tags:['budget','fuzzy','extreme','lofi'],d:'Three fuzz modes for the price of lunch. Plastic housing, surprisingly usable octave-fuzz mode.'},
+
+/* ── OCTAVE / PITCH ───────────────────────────────────────────────────── */
+{i:'micropog',n:'Micro POG',b:'Electro-Harmonix',c:'pitch',p:250,u:180,s:'std',ma:100,col:'#c8c8cc',k:3,
+ tags:['huge','shimmering','modern','glassy'],
+ d:'Adds a clean octave up and octave down that track instantly. Organ and 12-string sounds without any warble.'},
+{i:'pog2',n:'POG2',b:'Electro-Harmonix',c:'pitch',p:400,u:290,s:'xl',ma:190,col:'#b8bcc4',k:8,
+ tags:['huge','shimmering','spacey','dreamy','modern'],d:'Multiple octaves with attack and filter shaping. Full synth-pad and pipe-organ territory.'},
+{i:'pitchfork',n:'Pitch Fork',b:'Electro-Harmonix',c:'pitch',p:150,u:105,s:'std',ma:100,col:'#d8d8dc',k:2,
+ tags:['shimmering','spacey','modern'],d:'Pitch shifter covering three octaves either direction, with a detune mode for thickening.'},
+{i:'oc5',n:'OC-5 Octave',b:'Boss',c:'pitch',p:180,u:130,s:'boss',ma:65,col:'#e8c341',k:3,
+ tags:['punchy','vintage','modern'],d:'Polyphonic octave that tracks chords cleanly. The range knob lets you octave only the low strings.'},
+{i:'subnup',n:"Sub 'N' Up Octaver",b:'TC Electronic',c:'pitch',p:150,u:100,s:'std',ma:100,col:'#2b2f36',k:3,
+ tags:['modern','punchy','budget'],d:'Polyphonic octave up and two down, with downloadable preset voices. Great tracking for the money.'},
+{i:'ricochet',n:'Whammy Ricochet',b:'DigiTech',c:'pitch',p:200,u:145,s:'std',ma:300,col:'#b02020',k:2,
+ tags:['extreme','modern','spacey'],d:'Momentary pitch dive-bombs and leaps without a treadle. Instant Tom Morello and Muse noises.'},
+
+/* ── FILTER / WAH ─────────────────────────────────────────────────────── */
+{i:'crybaby',n:'Cry Baby GCB95',b:'Dunlop',c:'filter',p:110,u:65,s:'wah',ma:2,col:'#1a1a1c',k:0,
+ tags:['vintage','swirly','punchy'],d:'The standard wah. Heavy, indestructible, and takes up a lot of board.'},
+{i:'crybabymini',n:'Cry Baby Mini',b:'Dunlop',c:'filter',p:150,u:105,s:'wahmini',ma:5,col:'#8b1a1a',k:0,
+ tags:['vintage','swirly','small'],d:'Two-thirds the size, three voicing options inside. The sensible modern choice.'},
+{i:'v847',n:'V847-C Wah',b:'Vox',c:'filter',p:130,u:85,s:'wah',ma:2,col:'#1a1a1c',k:0,
+ tags:['vintage','warm','swirly'],d:'Warmer and more vocal than a Cry Baby, closer to the 60s original.'},
+{i:'qtron',n:'Q-Tron+',b:'Electro-Harmonix',c:'filter',p:250,u:180,s:'wide',ma:80,col:'#2b3a4a',k:5,
+ tags:['swirly','watery','vintage','extreme'],d:'Envelope filter — the quack responds to how hard you pick. Funk in a box, no treadle needed.'}
+);
+
+PEDALS.push(
+/* ── MODULATION ───────────────────────────────────────────────────────── */
+{i:'ce2w',n:'CE-2W Chorus',b:'Boss',c:'mod',p:250,u:185,s:'boss',ma:30,col:'#4a7fc4',k:2,
+ tags:['warm','watery','dreamy','vintage','lush'],
+ d:'The reissue of the chorus that defined the sound. Gentle, warm, three-dimensional — never seasick.'},
+{i:'ch1',n:'CH-1 Super Chorus',b:'Boss',c:'mod',p:110,u:65,s:'boss',ma:20,col:'#6fa8dc',k:4,
+ tags:['bright','glassy','watery','budget','shimmering'],d:'Bright, sparkling, obviously 80s chorus. Cheap and instantly recognisable.'},
+{i:'smallclone',n:'Small Clone',b:'Electro-Harmonix',c:'mod',p:110,u:70,s:'std',ma:25,col:'#3f6b8c',k:1,
+ tags:['watery','wobbly','vintage','dreamy'],d:'Deep, seasick, unmistakable chorus. The Come As You Are one.'},
+{i:'julia',n:'Julia V2',b:'Walrus Audio',c:'mod',p:200,u:145,s:'std',ma:22,col:'#2f4f6b',k:4,
+ tags:['dreamy','lush','watery','warm','shimmering'],
+ d:'Chorus and vibrato with a blend knob that sweeps between them. Lush and slightly melancholy — very good under clean arpeggios.'},
+{i:'corona',n:'Corona Chorus',b:'TC Electronic',c:'mod',p:130,u:85,s:'std',ma:100,col:'#2b2f36',k:3,
+ tags:['lush','watery','budget','shimmering'],d:'Includes a tri-chorus voice that gets genuinely enormous. Good value for lush cleans.'},
+{i:'phase90',n:'Phase 90',b:'MXR',c:'mod',p:110,u:70,s:'std',ma:8,col:'#f26722',k:1,
+ tags:['swirly','vintage','warm','wobbly'],d:'One knob, endless swirl. Sits under a clean tone or thickens a lead without you thinking about it.'},
+{i:'phase95',n:'Phase 95',b:'MXR',c:'mod',p:130,u:90,s:'mini',ma:12,col:'#f26722',k:1,
+ tags:['swirly','vintage','small','wobbly'],d:'Four classic phaser voices in a mini box. Strictly more useful than the Phase 90 and barely bigger than a stompbox lid.'},
+{i:'smallstone',n:'Small Stone',b:'Electro-Harmonix',c:'mod',p:110,u:70,s:'std',ma:25,col:'#2b3a4a',k:1,
+ tags:['swirly','watery','vintage','dreamy'],d:'Wetter and more liquid than a Phase 90. Very 70s, very hypnotic.'},
+{i:'unibve',n:'M68 Uni-Vibe',b:'MXR',c:'mod',p:130,u:90,s:'std',ma:20,col:'#3a5fa8',k:3,
+ tags:['swirly','dreamy','vintage','watery','warm'],d:'The pulsing, underwater throb from Machine Gun and Breathe. Half phaser, half tremolo, entirely a mood.'},
+{i:'flangerm117',n:'M117R Flanger',b:'MXR',c:'mod',p:200,u:145,s:'wide',ma:35,col:'#c8382f',k:4,
+ tags:['swirly','extreme','vintage','spacey'],d:'Jet-plane whoosh. Subtle at low settings, absurd at high ones.'},
+{i:'electricmistress',n:'Deluxe Electric Mistress',b:'Electro-Harmonix',c:'mod',p:180,u:130,s:'wide',ma:100,col:'#c8c8cc',k:4,
+ tags:['spacey','dreamy','swirly','vintage'],d:'Flanger with a filter-matrix mode that freezes into a fixed, glassy comb filter. Gilmour territory.'},
+{i:'tr2',n:'TR-2 Tremolo',b:'Boss',c:'mod',p:110,u:65,s:'boss',ma:15,col:'#4aa04a',k:3,
+ tags:['pulsing','vintage','budget','warm'],d:'Simple volume-pulsing tremolo. The cheapest way to make a clean part feel like it is breathing.'},
+{i:'monument',n:'Monument V2',b:'Walrus Audio',c:'mod',p:200,u:145,s:'std',ma:100,col:'#3f4a52',k:5,
+ tags:['pulsing','vintage','dreamy','lush'],d:'Harmonic and standard tremolo with tap tempo. Harmonic mode is a gorgeous, slightly seasick pulse.'},
+{i:'tidewater',n:'Tidewater',b:'JHS',c:'mod',p:180,u:130,s:'mini',ma:20,col:'#3f7a8c',k:2,
+ tags:['pulsing','vintage','small','warm'],d:'Blackface-amp-style tremolo in a mini box. Subtle, musical, always-on friendly.'},
+{i:'lex',n:'Lex Rotary',b:'Strymon',c:'mod',p:300,u:220,s:'wide',ma:250,col:'#8c8c94',k:5,
+ tags:['swirly','lush','dreamy','vintage','spacey'],d:'A convincing rotating speaker. Slow mode under clean chords is one of the prettiest sounds you can buy.'},
+{i:'vb2w',n:'VB-2W Vibrato',b:'Boss',c:'mod',p:250,u:185,s:'boss',ma:30,col:'#8c5fa8',k:3,
+ tags:['watery','wobbly','dreamy','vintage'],d:'True pitch vibrato, not chorus — no dry signal, so it warps rather than thickens. Woozy and lovely.'},
+
+/* ── DELAY ────────────────────────────────────────────────────────────── */
+{i:'carboncopy',n:'Carbon Copy',b:'MXR',c:'delay',p:150,u:105,s:'std',ma:26,col:'#2f7a4a',k:3,
+ tags:['dark','warm','lofi','vintage','dreamy'],
+ d:'Analog delay — repeats get darker and blurrier as they fade, sitting behind you instead of competing. 600ms max.'},
+{i:'dd8',n:'DD-8 Digital Delay',b:'Boss',c:'delay',p:200,u:145,s:'boss',ma:65,col:'#d8d8dc',k:4,
+ tags:['modern','glassy','shimmering','spacey'],d:'Eleven delay modes including reverse and shimmer, up to 10 seconds, with a looper. The workhorse choice.'},
+{i:'dm2w',n:'DM-2W Delay',b:'Boss',c:'delay',p:190,u:140,s:'boss',ma:65,col:'#4a7f5a',k:3,
+ tags:['warm','dark','vintage','lofi'],d:'Reissue of the original warm analog Boss delay, with a longer-and-cleaner mode added.'},
+{i:'flashback2',n:'Flashback 2',b:'TC Electronic',c:'delay',p:150,u:100,s:'std',ma:100,col:'#2b2f36',k:4,
+ tags:['modern','budget','spacey','shimmering'],d:'Lots of delay types plus tap tempo by holding the switch. Strong feature set for the price.'},
+{i:'arp87',n:'ARP-87',b:'Walrus Audio',c:'delay',p:200,u:145,s:'std',ma:100,col:'#8c3f5a',k:4,
+ tags:['lofi','dreamy','modern','spacey'],d:'Digital, analog, lo-fi and slapback modes. The lo-fi setting is filthy in the best way.'},
+{i:'elcap',n:'El Capistan V2',b:'Strymon',c:'delay',p:300,u:230,s:'wide',ma:250,col:'#c86b3f',k:6,
+ tags:['warm','lofi','dark','vintage','dreamy','lush'],
+ d:'A tape echo simulation with wow, flutter and tape age. Warbly, imperfect and deeply atmospheric.'},
+{i:'avalanche',n:'Avalanche Run V2',b:'EarthQuaker Devices',c:'delay',p:300,u:225,s:'wide',ma:300,col:'#3f5a8c',k:6,
+ tags:['dreamy','spacey','lush','shimmering','huge','ambient'],
+ d:'Delay and reverb together with a pitch-shifted mode. Built for exactly the drifting, weightless sound you are after.'},
+{i:'timeline',n:'TimeLine',b:'Strymon',c:'delay',p:450,u:340,s:'xl',ma:300,col:'#5a6b7a',k:8,
+ tags:['modern','spacey','lush','shimmering','ambient'],d:'Twelve studio-grade delay machines with presets. The end of the road for delay.'},
+{i:'jhs3delay',n:'3 Series Delay',b:'JHS',c:'delay',p:99,u:70,s:'std',ma:20,col:'#d8d4c8',k:3,
+ tags:['budget','warm','lofi','vintage'],d:'Three sliders, one job, honest price. A perfectly good first delay.'},
+{i:'re202',n:'RE-202 Space Echo',b:'Boss',c:'delay',p:400,u:300,s:'xl',ma:400,col:'#3f4a5a',k:8,
+ tags:['warm','vintage','lofi','lush','dreamy'],d:'Full recreation of the Roland Space Echo including its spring reverb. Enormous character, enormous box.'},
+
+/* ── REVERB ───────────────────────────────────────────────────────────── */
+{i:'rv6',n:'RV-6 Reverb',b:'Boss',c:'verb',p:160,u:110,s:'boss',ma:65,col:'#8ca8c4',k:4,
+ tags:['lush','shimmering','modern','dreamy'],
+ d:'Eight reverbs including shimmer and a very good modulated setting. The default recommendation for a first reverb.'},
+{i:'hof2',n:'Hall of Fame 2',b:'TC Electronic',c:'verb',p:150,u:100,s:'std',ma:100,col:'#2b2f36',k:4,
+ tags:['lush','shimmering','budget','spacey'],d:'Ten reverb types and a pressure-sensitive switch for swells. Great value.'},
+{i:'holygrail',n:'Holy Grail Nano',b:'Electro-Harmonix',c:'verb',p:130,u:85,s:'std',ma:100,col:'#c8c8cc',k:1,
+ tags:['budget','lush','spacey'],d:'Three reverbs, one knob, no menus. Spring, hall, and a flanged "Flerb" that is weirder than it sounds.'},
+{i:'slo',n:'Slö Multi Texture Reverb',b:'Walrus Audio',c:'verb',p:250,u:185,s:'std',ma:100,col:'#2f3a4a',k:6,
+ tags:['dreamy','ambient','lush','spacey','shimmering','washy'],
+ d:'Dark, rise and dream modes with a freeze switch. Built specifically for slow, sad, drifting textures.'},
+{i:'fathom',n:'Fathom',b:'Walrus Audio',c:'verb',p:200,u:145,s:'std',ma:100,col:'#3f5a6b',k:5,
+ tags:['lush','ambient','dreamy','washy','spacey'],d:'Four reverbs with a hold switch for infinite sustain. Cleaner and more classic than the Slö.'},
+{i:'afterneath',n:'Afterneath V3',b:'EarthQuaker Devices',c:'verb',p:250,u:185,s:'std',ma:65,col:'#6b3f8c',k:6,
+ tags:['spacey','ambient','washy','extreme','dreamy','lofi'],
+ d:'Not a room simulation — a cave made of discrete delay taps. The Drag knob smears everything into granular mush. Unique and addictive.'},
+{i:'darkstar',n:'Dark Star',b:'Old Blood Noise',c:'verb',p:300,u:225,s:'wide',ma:100,col:'#2a2a3a',k:6,
+ tags:['ambient','washy','dreamy','huge','spacey','dark'],
+ d:'A pad reverb with two pitch-shifted voices. Play one note and it becomes a synth pad underneath you.'},
+{i:'bluesky',n:'blueSky V2',b:'Strymon',c:'verb',p:300,u:225,s:'wide',ma:250,col:'#7a9ac4',k:6,
+ tags:['lush','shimmering','ambient','dreamy','washy'],d:'Plate, room and spring with shimmer. The benchmark for pretty, studio-quality reverb.'},
+{i:'bigsky',n:'BigSky',b:'Strymon',c:'verb',p:480,u:360,s:'xl',ma:300,col:'#6b8cb4',k:8,
+ tags:['ambient','lush','huge','shimmering','washy','spacey'],d:'Twelve reverb machines with presets. If reverb is the point of your rig, this is the one.'},
+{i:'immerse2',n:'Immerse MkII',b:'Neunaber',c:'verb',p:250,u:185,s:'std',ma:100,col:'#3a4a5a',k:5,
+ tags:['lush','ambient','shimmering','washy'],d:'Eight studio-grade reverbs in a small box. The shimmer is one of the best available at any price.'},
+{i:'caverns',n:'Caverns Delay Reverb V2',b:'Keeley',c:'verb',p:220,u:160,s:'std',ma:100,col:'#3f7a6b',k:5,
+ tags:['lush','dreamy','ambient','washy'],d:'Delay and reverb in one small box. The efficient way to get both when board space is tight.'},
+{i:'jhs3verb',n:'3 Series Reverb',b:'JHS',c:'verb',p:99,u:70,s:'std',ma:20,col:'#d8d4c8',k:3,
+ tags:['budget','lush','spacey'],d:'Three sliders, plate-style reverb, honest price. A very good first reverb.'},
+
+/* ── LOOPER / UTILITY / MULTI ─────────────────────────────────────────── */
+{i:'ditto',n:'Ditto Looper',b:'TC Electronic',c:'loop',p:130,u:85,s:'mini',ma:100,col:'#c8382f',k:1,
+ tags:['essential','small','budget'],d:'One knob, five minutes of looping, undo by holding. The best practice tool on this list.'},
+{i:'rc5',n:'RC-5 Loop Station',b:'Boss',c:'loop',p:250,u:185,s:'boss',ma:170,col:'#c8382f',k:3,
+ tags:['essential','modern'],d:'99 loops, drum patterns, a display. A one-person band in a compact box.'},
+{i:'ns2',n:'NS-2 Noise Suppressor',b:'Boss',c:'util',p:110,u:65,s:'boss',ma:20,col:'#c8c8cc',k:4,
+ tags:['essential','tight'],d:'Kills hiss and hum between phrases. Necessary once you run a lot of gain, pointless before that.'},
+{i:'ms70cdr',n:'MS-70CDR MultiStomp',b:'Zoom',c:'multi',p:130,u:85,s:'std',ma:200,col:'#2b2f36',k:4,
+ tags:['ambient','lush','washy','budget','dreamy','spacey','shimmering'],
+ d:'86 chorus, delay and reverb algorithms in one stompbox, and you can chain six at once. Absurd value — the cheapest route to serious ambient sound.'},
+{i:'ampero2',n:'Ampero II Stomp',b:'Hotone',c:'multi',p:300,u:220,s:'wide',ma:500,col:'#2a2a2e',k:6,
+ tags:['modern','budget','essential'],d:'Amp models, cab sims and effects with a touchscreen. Works as a whole rig into headphones or an interface.'},
+{i:'hxstomp',n:'HX Stomp',b:'Line 6',c:'multi',p:650,u:480,s:'wide',ma:500,col:'#2a2a2e',k:5,
+ tags:['modern','essential','lush','ambient'],d:'Professional amp and effects modelling in a tiny box. Replaces an entire board and an amp if you want it to.'}
+);
+
+/* ── CATEGORIES (chain order = signal chain position) ─────────────────── */
+const CATS = {
+  tuner:{n:'Tuner',     o:0,  w:'Silences the signal and tells you what note you are on.'},
+  filter:{n:'Wah / Filter',o:1,w:'Sweeps a peak through the frequency range — by foot, or by how hard you pick.'},
+  fuzz:{n:'Fuzz',       o:2,  w:'Squares the wave off completely. Not "more overdrive" — a different, ruder animal.'},
+  comp:{n:'Compressor', o:3,  w:'Turns loud notes down and quiet notes up. Evens out picking and adds sustain.'},
+  pitch:{n:'Octave / Pitch',o:4,w:'Adds a copy of your note an octave up or down, or shifts it entirely.'},
+  od:{n:'Overdrive',    o:5,  w:'Gentle clipping. Meant to sound like an amp worked slightly too hard.'},
+  dist:{n:'Distortion', o:6,  w:'Harder clipping than overdrive. Makes its own aggressive voice rather than flattering your amp.'},
+  boost:{n:'Boost',     o:7,  w:'More level, ideally no tone change. Pushes whatever comes after it harder.'},
+  eq:{n:'EQ',           o:8,  w:'Turns specific frequencies up or down. The least exciting and most useful pedal you can own.'},
+  util:{n:'Noise / Utility',o:9,w:'Cleans up hiss, hum and impedance problems. Nobody buys these first.'},
+  mod:{n:'Modulation',  o:10, w:'Chorus, phaser, flanger, tremolo, vibrato — movement and shimmer added to a static tone.'},
+  delay:{n:'Delay',     o:11, w:'Repeats what you played. Slapback, rhythmic echo, or endless drifting wash.'},
+  verb:{n:'Reverb',     o:12, w:'Puts you in a room, a hall, or a cave that does not exist.'},
+  multi:{n:'Multi-effects',o:13,w:'Many effects in one box. Usually the sensible answer when you want a lot of sounds cheap.'},
+  loop:{n:'Looper',     o:14, w:'Records a phrase and plays it back so you can play over yourself.'}
+};
+
+/* ── TONE VOCABULARY — plain language, grouped ───────────────────────── */
+const TONES = [
+ {g:'Character', t:[
+   ['warm','Warm & round','thick, no sharp edges'],
+   ['bright','Bright & cutting','forward, present, slices through'],
+   ['dark','Dark & muted','treble rolled off, sits behind you'],
+   ['glassy','Glassy & clear','shimmery clean, piano-like'],
+   ['smooth','Smooth & even','polished, no rasp'],
+   ['gritty','Gritty & raw','hair and dirt on the note'],
+   ['squishy','Squishy','audible pump and pop on the attack']]},
+ {g:'How dirty', t:[
+   ['crunchy','Crunchy','light breakup, chords still read'],
+   ['fuzzy','Fuzzy','torn apart, buzzy, vintage-broken'],
+   ['huge','Huge & massive','enormous, wall-of-sound'],
+   ['extreme','Extreme','over the top on purpose'],
+   ['tight','Tight & controlled','fast, no flab in the low end'],
+   ['punchy','Punchy','hits hard on the attack'],
+   ['sustaining','Endless sustain','notes hang forever']]},
+ {g:'Space', t:[
+   ['dreamy','Dreamy','soft-focus and a bit sad'],
+   ['ambient','Ambient','texture more than notes'],
+   ['washy','Washed out','blurred until the notes smear together'],
+   ['spacey','Spacey','big, distant, unreal'],
+   ['shimmering','Shimmering','sparkling high overtones'],
+   ['lush','Lush','rich and expensive-sounding']]},
+ {g:'Movement', t:[
+   ['watery','Watery','liquid, underwater'],
+   ['swirly','Swirly','sweeping, whooshing'],
+   ['wobbly','Wobbly','pitch drifting, seasick'],
+   ['pulsing','Pulsing','rhythmic throb in the volume']]},
+ {g:'Texture', t:[
+   ['lofi','Lo-fi','degraded, tape-worn, imperfect'],
+   ['broken','Broken','sputtering, gated, falling apart'],
+   ['vintage','Vintage','old-record character'],
+   ['modern','Modern & hi-fi','clean, precise, studio'],
+   ['transparent','Transparent','you still hear your amp and guitar'],
+   ['subtle','Subtle','you notice it when you turn it off']]},
+ {g:'Practical', t:[
+   ['budget','Cheap for what it is','punches above its price'],
+   ['small','Small footprint','mini enclosure'],
+   ['essential','Foundational','the boring stuff every board wants']]}
+];
+
+/* ── ENCLOSURE SIZES (real mm) ───────────────────────────────────────── */
+const SIZES = {
+  mini:   {w:40, h:93,  l:'mini'},
+  std:    {w:63, h:117, l:'standard'},
+  boss:   {w:73, h:129, l:'Boss compact'},
+  wide:   {w:114,h:102, l:'wide'},
+  bigbox: {w:145,h:121, l:'large'},
+  xl:     {w:173,h:102, l:'XL'},
+  wah:    {w:100,h:254, l:'wah'},
+  wahmini:{w:87, h:150, l:'mini wah'}
+};
+
+/* ── BOARDS (usable area, mm) ────────────────────────────────────────── */
+const BOARDS = [
+  {i:'nano',    n:'Pedaltrain Nano',      w:356,h:127, p:80},
+  {i:'nanoplus',n:'Pedaltrain Nano+',     w:457,h:127, p:100},
+  {i:'metro20', n:'Pedaltrain Metro 20',  w:508,h:203, p:130},
+  {i:'metro24', n:'Pedaltrain Metro 24',  w:610,h:203, p:150},
+  {i:'classicjr',n:'Pedaltrain Classic Jr',w:457,h:318,p:150},
+  {i:'classic2',n:'Pedaltrain Classic 2', w:610,h:318, p:190},
+  {i:'floor',   n:'No board — on the floor',w:900,h:520,p:0}
+];
+
+/* ── AMPS ────────────────────────────────────────────────────────────────
+   kind : tube | ss | modeling
+   head : high (stays clean) | mid | low (breaks up early) | gain (makes its own distortion)
+   loop : has an effects loop        fx : has its own effects library
+   verb : has onboard reverb         spk: speaker size in inches
+------------------------------------------------------------------------ */
+const AMPS = [
+ {i:'spark2',n:'Spark 2',b:'Positive Grid',kind:'modeling',w:50,spk:4,head:'high',loop:0,fx:1,verb:1,
+  d:'Modelling amp with a large built-in effects library, Bluetooth and USB audio.'},
+ {i:'crush12',n:'Crush 12',b:'Orange',kind:'ss',w:12,spk:6,head:'low',loop:0,fx:0,verb:0,
+  d:'12-watt solid-state practice combo. No reverb, no effects loop, gain knob of its own.'},
+ {i:'crush20',n:'Crush 20',b:'Orange',kind:'ss',w:20,spk:8,head:'low',loop:0,fx:0,verb:0,
+  d:'Two channels, still no reverb or loop, a bit more speaker to work with.'},
+ {i:'katana50',n:'Katana 50 MkII',b:'Boss',kind:'modeling',w:50,spk:12,head:'high',loop:1,fx:1,verb:1,
+  d:'Modelling combo with an effects loop and a deep built-in effects library.'},
+ {i:'mustanglt',n:'Mustang LT25',b:'Fender',kind:'modeling',w:25,spk:8,head:'high',loop:0,fx:1,verb:1,
+  d:'Small modelling practice combo with onboard amp models and effects.'},
+ {i:'champion20',n:'Champion 20',b:'Fender',kind:'ss',w:20,spk:8,head:'mid',loop:0,fx:1,verb:1,
+  d:'Solid-state practice combo with basic voices and simple onboard effects.'},
+ {i:'deluxereverb',n:'Deluxe Reverb',b:'Fender',kind:'tube',w:22,spk:12,head:'high',loop:0,fx:0,verb:1,
+  d:'The reference pedal-platform amp. Stays clean loud, gorgeous spring reverb, no effects loop.'},
+ {i:'princeton',n:'Princeton Reverb',b:'Fender',kind:'tube',w:12,spk:10,head:'mid',loop:0,fx:0,verb:1,
+  d:'Small blackface combo. Clean at bedroom volume, breaks up sweetly when pushed.'},
+ {i:'twinreverb',n:'Twin Reverb',b:'Fender',kind:'tube',w:85,spk:12,head:'high',loop:0,fx:0,verb:1,
+  d:'Enormous clean headroom. Essentially never distorts on its own.'},
+ {i:'bluesjr',n:'Blues Junior IV',b:'Fender',kind:'tube',w:15,spk:12,head:'mid',loop:0,fx:0,verb:1,
+  d:'Cleanish until about halfway, then a bright, crunchy breakup.'},
+ {i:'hotrod',n:'Hot Rod Deluxe IV',b:'Fender',kind:'tube',w:40,spk:12,head:'high',loop:1,fx:0,verb:1,
+  d:'Loud clean platform with an effects loop and a much-maligned drive channel.'},
+ {i:'ac15',n:'AC15C1',b:'Vox',kind:'tube',w:15,spk:12,head:'low',loop:0,fx:0,verb:1,
+  d:'Chimey and breaking up early. Loves boosts and low-gain overdrives.'},
+ {i:'ac30',n:'AC30C2',b:'Vox',kind:'tube',w:30,spk:12,head:'mid',loop:0,fx:0,verb:1,
+  d:'The chime with more headroom. Still gets crunchy when you lean on it.'},
+ {i:'jc120',n:'JC-120 Jazz Chorus',b:'Roland',kind:'ss',w:120,spk:12,head:'high',loop:1,fx:1,verb:1,
+  d:'Legendary relentlessly clean solid-state platform, with an effects loop and its own chorus.'},
+ {i:'origin20',n:'Origin 20C',b:'Marshall',kind:'tube',w:20,spk:10,head:'mid',loop:1,fx:0,verb:0,
+  d:'Single-channel Marshall crunch with an effects loop and no onboard reverb.'},
+ {i:'dsl40',n:'DSL40CR',b:'Marshall',kind:'tube',w:40,spk:12,head:'gain',loop:1,fx:0,verb:1,
+  d:'Two channels including a genuinely high-gain one, plus an effects loop.'},
+ {i:'rocker15',n:'Rocker 15',b:'Orange',kind:'tube',w:15,spk:10,head:'low',loop:1,fx:0,verb:0,
+  d:'Dirty channel does the work; the clean channel breaks up early too.'},
+ {i:'5150',n:'5150 III 50W',b:'EVH',kind:'tube',w:50,spk:12,head:'gain',loop:1,fx:0,verb:0,
+  d:'Modern high-gain head. The amp makes the distortion; pedals boost and sit in the loop.'},
+ {i:'iface',n:'Headphones / audio interface',b:'',kind:'modeling',w:0,spk:0,head:'high',loop:0,fx:1,verb:1,
+  d:'Straight into a computer with amp sims. Effects are already in software.'}
+];
+
+/* ===== STATE ============================================================ */
+const K = 'sig-';
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(K+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(K+k,JSON.stringify(v)); }catch(e){} }
+};
+const ST = {
+  tab:   store.get('tab','find'),
+  theme: store.get('theme','sunset'),
+  amp:   store.get('amp','crush12'),
+  tones: store.get('tones',[]),
+  cat:   store.get('cat','all'),
+  min:   store.get('min',0),
+  max:   store.get('max',700),
+  used:  store.get('used',false),
+  board: store.get('board',[]),
+  size:  store.get('size','metro20'),
+  open:  null
+};
+const PMAX = 700;
+const byId = i => PEDALS.find(p=>p.i===i);
+const amp  = () => AMPS.find(a=>a.i===ST.amp) || AMPS[1];
+const price= p => ST.used ? (p.u || Math.round(p.p*0.7)) : p.p;
+const esc  = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = s => document.querySelector(s);
+
+/* ===== ENCLOSURE DRAWING =============================================== */
+function lum(hex){
+  const h=hex.replace('#',''); const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);
+  const r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
+  const f=c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);
+  return .2126*f(r)+.7152*f(g)+.0722*f(b);
+}
+function shade(hex,amt){
+  const h=hex.replace('#',''); const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);
+  const cl=v=>Math.max(0,Math.min(255,Math.round(v)));
+  const r=cl((n>>16&255)+amt), g=cl((n>>8&255)+amt), b=cl((n&255)+amt);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+/* draws a pedal in millimetre coordinates; returns inner SVG markup */
+function pedalBody(p,ox,oy,withText){
+  const S=SIZES[p.s], W=S.w, H=S.h, col=p.col||'#3a3a3e';
+  const dark = lum(col) < 0.42;
+  const ink  = dark ? 'rgba(255,255,255,.92)' : 'rgba(0,0,0,.82)';
+  const ink2 = dark ? 'rgba(255,255,255,.5)'  : 'rgba(0,0,0,.5)';
+  const wah = p.s==='wah'||p.s==='wahmini';
+  const g=[];
+  const id='g'+p.i.replace(/[^a-z0-9]/gi,'');
+  g.push('<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="'+shade(col,26)+'"/>'+
+    '<stop offset="1" stop-color="'+shade(col,-20)+'"/></linearGradient></defs>');
+  g.push('<g transform="translate('+ox+','+oy+')">');
+  /* side jacks */
+  g.push('<rect x="-2.2" y="'+(H*0.10)+'" width="3.4" height="9" rx="1.4" fill="#2a2a2c"/>');
+  g.push('<rect x="'+(W-1.2)+'" y="'+(H*0.10)+'" width="3.4" height="9" rx="1.4" fill="#2a2a2c"/>');
+  /* body */
+  g.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="'+(wah?7:4.2)+'" fill="url(#'+id+')" '+
+         'stroke="'+shade(col,dark?34:-46)+'" stroke-width="0.8"/>');
+
+  if(wah){
+    g.push('<path d="M4 '+(H*0.30)+' L'+(W-4)+' '+(H*0.16)+' L'+(W-4)+' '+(H-6)+' L4 '+(H-6)+' Z" '+
+           'fill="'+(dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.08)')+'" stroke="'+ink2+'" stroke-width="0.5"/>');
+    for(let i=0;i<7;i++){
+      const yy=H*0.34+i*((H*0.62)/7);
+      g.push('<rect x="9" y="'+yy+'" width="'+(W-18)+'" height="1.6" rx="0.8" fill="'+ink2+'" opacity=".45"/>');
+    }
+    if(withText){
+      g.push('<text x="'+(W/2)+'" y="'+(H*0.12)+'" text-anchor="middle" font-size="6" fill="'+ink+'" '+
+             'font-family="ui-monospace,Menlo,monospace" letter-spacing="1.1">'+esc(p.b.toUpperCase())+'</text>');
+    }
+    g.push('</g>'); return g.join('');
+  }
+
+  /* knobs */
+  const k=p.k||0;
+  let knobBottom = H*0.10;
+  if(k>0){
+    const perRow = k<=3?k:(k<=6?Math.ceil(k/2):Math.ceil(k/3));
+    const rows   = Math.ceil(k/perRow);
+    const r = Math.max(2.6, Math.min(W/(perRow*2.9), H*0.075, 8));
+    let n=0;
+    for(let ry=0; ry<rows; ry++){
+      const cnt = Math.min(perRow, k-n);
+      const topY = H*0.15 + ry*(r*2.7);
+      for(let cx=0; cx<cnt; cx++){
+        const X = cnt===1 ? W*0.5 : W*0.14 + cx*((W*0.72)/(cnt-1));
+        g.push('<circle cx="'+X+'" cy="'+topY+'" r="'+r+'" fill="'+(dark?'#e8e8ea':'#26262a')+'" '+
+               'stroke="rgba(0,0,0,.35)" stroke-width="0.4"/>');
+        g.push('<line x1="'+X+'" y1="'+topY+'" x2="'+(X+r*0.62)+'" y2="'+(topY-r*0.62)+'" '+
+               'stroke="'+(dark?'#26262a':'#e8e8ea')+'" stroke-width="'+(r*0.22)+'" stroke-linecap="round"/>');
+        n++;
+      }
+      knobBottom = topY + r;
+    }
+  }
+  /* label — wraps to at most two lines so long names stay readable */
+  if(withText){
+    const fs  = Math.max(3.4, Math.min(W*0.112, 7.2));
+    const cpl = Math.max(6, Math.floor((W-6)/(fs*0.55)));   /* chars that fit on one line */
+    const lines=[]; let cur='';
+    for(const word of p.n.split(' ')){
+      const t = cur ? cur+' '+word : word;
+      if(t.length<=cpl || !cur){ cur=t; }
+      else { lines.push(cur); cur=word; if(lines.length===2) break; }
+    }
+    if(lines.length<2 && cur) lines.push(cur);
+    if(lines.length===2 && lines[1].length>cpl) lines[1]=lines[1].slice(0,cpl-1)+'\u2026';
+    const avail = H*0.66 - (knobBottom+3);
+    const need  = lines.length*fs*1.14 + fs*0.86;
+    let ly = knobBottom + 3 + fs;
+    if(need > avail) ly = Math.max(knobBottom+3+fs, H*0.66 - need + fs);
+    lines.forEach((L,idx)=>{
+      g.push('<text x="'+(W/2)+'" y="'+(ly+idx*fs*1.14)+'" text-anchor="middle" font-size="'+fs+'" '+
+             'fill="'+ink+'" font-weight="600" font-family="-apple-system,system-ui,sans-serif">'+esc(L)+'</text>');
+    });
+    g.push('<text x="'+(W/2)+'" y="'+(ly+lines.length*fs*1.14+fs*0.12)+'" text-anchor="middle" '+
+           'font-size="'+(fs*0.70)+'" fill="'+ink2+'" font-family="ui-monospace,Menlo,monospace" '+
+           'letter-spacing="0.55">'+esc(p.b.toUpperCase())+'</text>');
+  }
+  /* LED + footswitch */
+  g.push('<circle cx="'+(W/2)+'" cy="'+(H*0.70)+'" r="'+(W*0.032)+'" fill="#ff4d4d" opacity=".9"/>');
+  const fr = Math.min(W*0.15, 9);
+  g.push('<circle cx="'+(W/2)+'" cy="'+(H*0.855)+'" r="'+fr+'" fill="'+(dark?'#c8c8cc':'#4a4a50')+'" '+
+         'stroke="rgba(0,0,0,.4)" stroke-width="0.5"/>');
+  g.push('<circle cx="'+(W/2)+'" cy="'+(H*0.855)+'" r="'+(fr*0.55)+'" fill="'+(dark?'#8f8f96':'#6e6e76')+'"/>');
+  g.push('</g>');
+  return g.join('');
+}
+function pedalSVG(p,withText){
+  const S=SIZES[p.s];
+  return '<svg viewBox="-4 -4 '+(S.w+8)+' '+(S.h+8)+'" xmlns="http://www.w3.org/2000/svg">'+
+         pedalBody(p,0,0,withText)+'</svg>';
+}
+
+/* ===== AMP FIT =========================================================
+   Returns a score delta plus plain-language notes explaining the delta.
+   Every rule here is a real interaction, not decoration.
+======================================================================= */
+const DIRT = ['od','dist','fuzz','boost'];
+const TIME = ['delay','verb'];
+
+function ampFit(p,a){
+  const n=[]; let d=0;
+  const dirt=DIRT.includes(p.c), time=TIME.includes(p.c), mod=p.c==='mod';
+  const g=p.g||0, lo=p.lo||'neutral', br=p.br||0;
+  const push=(k,t)=>n.push([k,t]);
+
+  /* the amp already owns this sound in software */
+  if(a.fx && (time||mod||p.c==='multi')){
+    d-=24;
+    push('warn','The '+a.n+' already has '+(p.c==='multi'?'a full effects library':'this kind of effect')+
+      ' built in. Buying this means paying for a sound you already own — worth it only if you want it on a real board.');
+  }
+  /* no effects loop */
+  if(!a.loop && time && !a.fx){
+    d-=3;
+    push('info','No effects loop on the '+a.n+', so this has to sit in front of your dirt. Fine at low gain; at high gain the repeats get chewed up and muddy.');
+  }
+  /* small speaker vs big low end */
+  if(a.spk && a.spk<=8 && lo==='huge'){
+    d-=30;
+    push('warn','Enormous low end into a '+a.spk+'-inch speaker. It will flub and fart out long before it sounds heavy — this needs a 12-inch cone.');
+  }else if(a.spk && a.spk<=10 && lo==='huge'){
+    d-=8;
+    push('info','Lots of low end for a '+a.spk+'-inch speaker. Roll the bass back or it gets loose.');
+  }
+  /* clean amp: dirt pedals must make their own voice */
+  if(a.head==='high' && dirt){
+    if(p.aib){ d+=17; push('good','Your amp stays clean, so the pedal has to supply the whole distorted voice. This one does — it is an amp sound in a box.'); }
+    else if(g<=3 && p.psh){ d-=16; push('warn','This is built to shove an amp that is already breaking up. Into a clean amp it mostly just gets louder.'); }
+  }
+  /* amp that breaks up early */
+  if(a.head==='low' && dirt){
+    if(p.psh && g<=5){ d+=16; push('good','The '+a.n+' is already close to breakup, so a pedal like this tips it over the edge instead of fighting it. This is the sweet spot for your amp.'); }
+    if(g>=8){ d-=12; push('warn','Heavy gain stacked on an amp that is already dirty usually turns to mush rather than getting heavier.'); }
+  }
+  /* high-gain amp */
+  if(a.head==='gain'){
+    if(dirt && g>=7){ d-=14; push('warn','Your amp makes its own distortion. A high-gain pedal in front of it mostly adds fizz — use the amp channel and boost it instead.'); }
+    if(p.c==='boost'){ d+=16; push('good','A boost in front of a high-gain amp tightens the low end and lifts solos. Exactly the right tool for this rig.'); }
+    if(time && a.loop){ d+=6; push('info','Run this in the effects loop, after the amp distortion — in front it will sound smeared.'); }
+  }
+  /* solid-state character */
+  if((a.kind==='ss'||a.kind==='modeling') && dirt && br>=2){
+    d-=13;
+    push('warn','Bright and fizzy into a solid-state amp is the classic harsh combination. Keep the tone knob low, or pick something warmer.');
+  }
+  if(a.kind==='ss' && dirt && br<=0 &&
+     (p.tags.includes('warm')||p.tags.includes('smooth')||p.tags.includes('transparent'))){
+    d+=11; push('good','Warmer, rounder voicing — this flatters a solid-state amp instead of exposing it.');
+  }
+  /* quiet-room reality */
+  if(a.w && a.w<=20){
+    if(p.c==='boost' && g<=1){ d-=11; push('warn','A clean boost earns its keep by pushing a loud amp harder. At bedroom volume on a '+a.w+'-watt amp it just turns things up.'); }
+    if(p.c==='comp'||p.c==='verb'){ d+=9; push('good','Does audible work at low volume, which is most of what a '+a.w+'-watt amp ever gets used at.'); }
+  }
+  /* missing reverb */
+  if(!a.verb && p.c==='verb'){ d+=14; push('good','The '+a.n+' has no reverb of its own. This is the pedal that fixes the single most obvious gap in your rig.'); }
+  if(!a.verb && p.c==='mod' && p.tags.includes('lush')){ d+=4; }
+  /* fuzz wants the guitar first */
+  if(p.c==='fuzz' && /^ff/.test(p.i)){
+    push('info','Fuzz Face circuits want to see your guitar directly. Put it first in the chain — a buffered tuner in front will make it thin and choke the volume-knob cleanup.');
+  }
+  /* interface / headphones */
+  if(a.w===0 && dirt){ d-=6; push('info','Straight into an interface there is no speaker moving air, so dirt pedals sound thinner than through an amp. A cab sim after it fixes most of that.'); }
+  return {d,n};
+}
+
+/* ===== SCORING =========================================================
+   Two extra signals beyond tone-match and amp-fit:
+   PICKS   — pedals widely held up as best-in-class for the money.
+   STARTER — the sensible first pedal of its type for someone new.
+   Plus a de-clump pass so the top of the list is not six overdrives.
+======================================================================= */
+const PICKS = new Set(['plumes','odr1','ms70cdr','polytune3','carboncopy','rv6','ditto','soulfood',
+  'rat2','phase95','timmy','ge7','hof2','slo','afterneath','jhs3verb','jhs3delay','sd1','ce2w',
+  'micropog','tumnus','keeleycomp','crybabymini','fathom','ocd','immerse2','tu3']);
+const STARTER = new Set(['tu3','polytune3','sd1','plumes','ts9','rat2','ds1','carboncopy','jhs3delay',
+  'rv6','jhs3verb','hof2','holygrail','dynacomp','phase90','tr2','ditto','nanomuff','ms70cdr','odr1']);
+
+function results(){
+  const a=amp(), sel=ST.tones, out=[];
+  for(const p of PEDALS){
+    if(ST.cat!=='all' && p.c!==ST.cat) continue;
+    const pr=price(p);
+    if(pr<ST.min || pr>ST.max) continue;
+    const matched = sel.filter(t=>(p.tags||[]).includes(t));
+    if(sel.length && !matched.length) continue;
+    let s=0;
+    s += matched.length*14;
+    if(sel.length) s += (matched.length/sel.length)*26;
+    const f=ampFit(p,a);
+    s += f.d;
+    if(PICKS.has(p.i)) s += 7;
+    if(!sel.length && STARTER.has(p.i)) s += 9;      /* browsing blind: surface the obvious first buys */
+    s += Math.max(0,(ST.max-pr)/ST.max)*3;           /* gentle nudge toward the cheaper end of your window */
+    out.push({p,pr,s,base:s,matched,notes:f.n});
+  }
+  out.sort((x,y)=> y.base-x.base || x.pr-y.pr || x.p.n.localeCompare(y.p.n));
+
+  /* de-clump: each extra pedal of a category already shown costs a little */
+  const seen={}; 
+  out.forEach(o=>{
+    const k=o.p.c, n=seen[k]||0;
+    o.s = o.base - Math.min(n*6, 26);
+    seen[k]=n+1;
+  });
+  out.sort((x,y)=> y.s-x.s || x.pr-y.pr || x.p.n.localeCompare(y.p.n));
+
+  const top = out.length ? out[0].s : 1;
+  out.forEach(o=>{
+    const gap = top - o.s;
+    o.verdict = gap<=8 ? 'strong' : gap<=24 ? 'good' : gap<=48 ? 'ok' : 'poor';
+  });
+  return out;
+}
+const VERDICT = {strong:'strong fit',good:'good fit',ok:'workable',poor:'poor fit'};
+
+/* ===== BOARD LAYOUT ==================================================== */
+const GAP = 12;                                   /* mm between pedals */
+function chainSorted(ids){
+  return ids.map(byId).filter(Boolean)
+            .sort((a,b)=> CATS[a.c].o - CATS[b.c].o || a.n.localeCompare(b.n));
+}
+function packBoard(list,bw,bh){
+  let x=GAP, y=GAP, rowH=0, ok=true; const placed=[];
+  for(const p of list){
+    const S=SIZES[p.s];
+    if(x + S.w + GAP > bw && placed.length){ x=GAP; y+=rowH+GAP; rowH=0; }
+    if(y + S.h + GAP > bh || S.w + GAP*2 > bw) ok=false;
+    placed.push({p,x,y,w:S.w,h:S.h});
+    x += S.w + GAP;
+    rowH = Math.max(rowH,S.h);
+  }
+  return {placed, ok, usedH: placed.length? y+rowH+GAP : 0};
+}
+function boardStats(){
+  const list = chainSorted(ST.board);
+  const b = BOARDS.find(x=>x.i===ST.size) || BOARDS[2];
+  const pk = packBoard(list,b.w,b.h);
+  const cost = list.reduce((t,p)=>t+price(p),0) + (ST.size==='floor'?0:b.p);
+  const ma   = list.reduce((t,p)=>t+(p.ma||20),0);
+  const area = list.reduce((t,p)=>t+SIZES[p.s].w*SIZES[p.s].h,0);
+  return {list,b,pk,cost,ma,area,
+          fill: Math.round(100*area/(b.w*b.h)),
+          cables: Math.max(0,list.length-1)};
+}
+
+/* ===== VIEWS =========================================================== */
+const THEMES=[['sunset','#ff8fb0','#ffa25c'],['midnight','#77b0ff','#8fd8e8'],
+              ['ember','#ffc861','#ff7d47'],['mono','#f2f2f2','#8a8a8a'],['paper','#c2436b','#cf6a26']];
+
+function money(n){ return '$'+n.toLocaleString('en-US'); }
+function noteHTML(n){
+  return n.map(x=>'<div class="note '+x[0]+'"><b></b><span>'+esc(x[1])+'</span></div>').join('');
+}
+
+/* ---------- FIND ------------------------------------------------------ */
+function viewFind(){
+  const a=amp(), res=results(), top=res[0];
+  const catChips = ['<button class="chip" data-cat="all" aria-pressed="'+(ST.cat==='all')+'">Everything</button>']
+    .concat(Object.keys(CATS).sort((x,y)=>CATS[x].o-CATS[y].o).map(c=>
+      '<button class="chip" data-cat="'+c+'" aria-pressed="'+(ST.cat===c)+'">'+esc(CATS[c].n)+'</button>')).join('');
+  const toneChips = TONES.map(g=>
+    '<div class="tgrp"><div class="gl">'+esc(g.g)+'</div><div class="chips">'+
+    g.t.map(t=>'<button class="chip" data-tone="'+t[0]+'" aria-pressed="'+(ST.tones.includes(t[0]))+'" '+
+      'title="'+esc(t[2])+'">'+esc(t[1])+'</button>').join('')+'</div></div>').join('');
+
+  const hero = top ? (
+    '<div class="hero"><div class="hero-in">'+
+      '<div class="hero-art">'+pedalSVG(top.p,true)+'</div>'+
+      '<div class="hero-body">'+
+        '<div class="rankline"><span class="best">Best match for your rig</span></div>'+
+        '<h2>'+esc(top.p.n)+'</h2>'+
+        '<div class="brand">'+esc(top.p.b)+' &middot; '+esc(CATS[top.p.c].n)+'</div>'+
+        '<p class="desc">'+esc(top.p.d)+'</p>'+
+        '<div class="metarow">'+
+          '<div class="meta"><div class="lbl">'+(ST.used?'Used':'New')+'</div><div class="v">'+money(top.pr)+'</div></div>'+
+          '<div class="meta"><div class="lbl">Size</div><div class="v">'+SIZES[top.p.s].w+'<small>×</small>'+SIZES[top.p.s].h+'<small>mm</small></div></div>'+
+          '<div class="meta"><div class="lbl">Draw</div><div class="v">'+(top.p.ma||20)+'<small>mA</small></div></div>'+
+          '<div class="meta"><div class="lbl">Chain position</div><div class="v">'+(CATS[top.p.c].o+1)+'<small>/15</small></div></div>'+
+          '<div class="meta" style="margin-left:auto"><div class="lbl">&nbsp;</div>'+
+            '<button class="btn '+(ST.board.includes(top.p.i)?'':'pri')+'" data-add="'+top.p.i+'">'+
+            (ST.board.includes(top.p.i)?'On your board':'Add to board')+'</button></div>'+
+        '</div>'+
+        (top.notes.length?'<div class="notes">'+noteHTML(top.notes)+'</div>':
+          '<div class="notes"><div class="note info"><b></b><span>Nothing about the '+esc(a.n)+
+          ' argues for or against this one — it will do what it says.</span></div></div>')+
+      '</div></div></div>') :
+    '<div class="empty"><b>Nothing matches</b>Widen the price window, or drop a descriptor or two.</div>';
+
+  const rows = res.slice(1).map((o,i)=>{
+    const on = ST.board.includes(o.p.i);
+    return '<div class="row'+(ST.open===o.p.i?' open':'')+'" data-open="'+o.p.i+'">'+
+      '<div class="rk">'+(i+2)+'</div>'+
+      '<div class="art">'+pedalSVG(o.p,false)+'</div>'+
+      '<div class="nm"><div class="t">'+esc(o.p.n)+'</div><div class="s">'+esc(o.p.b)+'</div></div>'+
+      '<div class="ct">'+esc(CATS[o.p.c].n)+'</div>'+
+      '<div class="mt" style="color:var(--'+(o.verdict==='strong'?'good':o.verdict==='poor'?'faint':'dim')+')">'+
+        esc(VERDICT[o.verdict])+'</div>'+
+      '<div class="pr">'+money(o.pr)+'</div>'+
+      '<button class="add'+(on?' on':'')+'" data-add="'+o.p.i+'" title="'+(on?'Remove from board':'Add to board')+'">'+
+        (on?'&#10003;':'+')+'</button></div>'+
+      (ST.open===o.p.i ? '<div class="detail"><div class="desc">'+esc(o.p.d)+'</div>'+
+        (o.notes.length?'<div class="notes">'+noteHTML(o.notes)+'</div>':
+         '<div class="hint">No strong interaction with the '+esc(a.n)+' either way.</div>')+'</div>' : '');
+  }).join('');
+
+  return '<div class="sec"><div class="lbl">Playing through'+
+      '<span class="r">'+esc(a.d)+'</span></div>'+
+      '<select id="ampsel">'+AMPS.map(x=>'<option value="'+x.i+'"'+(x.i===ST.amp?' selected':'')+'>'+
+        esc((x.b?x.b+' ':'')+x.n)+'</option>').join('')+'</select></div>'+
+
+    '<div class="sec"><div class="lbl">Price window<span class="r">approx. street price, USD</span></div>'+
+      '<div class="pricebox">'+
+        '<div class="pfield"><span>min</span><input id="pmin" class="mono" type="number" min="0" max="'+PMAX+'" value="'+ST.min+'"></div>'+
+        '<div class="dual"><div class="track"></div><div class="fill" id="pfill"></div>'+
+          '<input type="range" id="rmin" min="0" max="'+PMAX+'" step="5" value="'+ST.min+'">'+
+          '<input type="range" id="rmax" min="0" max="'+PMAX+'" step="5" value="'+ST.max+'"></div>'+
+        '<div class="pfield"><span>max</span><input id="pmax" class="mono" type="number" min="0" max="'+PMAX+'" value="'+ST.max+'"></div>'+
+        '<div class="seg"><button data-used="0" aria-pressed="'+(!ST.used)+'">New</button>'+
+          '<button data-used="1" aria-pressed="'+(ST.used)+'">Used</button></div>'+
+      '</div></div>'+
+
+    '<div class="sec"><div class="lbl">Kind of pedal</div><div class="chips" id="cats">'+catChips+'</div></div>'+
+    '<div class="sec"><div class="lbl">What should it sound like'+
+      (ST.tones.length?'<span class="r"><button class="btn" id="clrtone" style="padding:3px 9px">clear '+ST.tones.length+'</button></span>':'')+
+      '</div>'+toneChips+'</div>'+
+    hero+
+    (res.length>1?'<div class="sec"><div class="lbl">Also worth a look<span class="r">'+(res.length-1)+' more in range</span></div>'+
+      '<div class="rows">'+rows+'</div></div>':'');
+}
+
+/* ---------- BOARD ----------------------------------------------------- */
+function viewBoard(){
+  const S=boardStats();
+  if(!S.list.length){
+    return '<div class="sec"><div class="lbl">Board</div></div>'+
+      '<div class="empty"><b>Nothing on the board yet</b>Add pedals from the Find tab and they will lay out here in signal-chain order, at true relative size.</div>';
+  }
+  const b=S.b, pad=26;
+  const svg='<svg viewBox="'+(-pad)+' '+(-pad)+' '+(b.w+pad*2)+' '+(b.h+pad*2)+'" xmlns="http://www.w3.org/2000/svg" '+
+    'style="width:'+Math.min(980,b.w*1.7)+'px">'+
+    '<rect x="0" y="0" width="'+b.w+'" height="'+b.h+'" rx="6" fill="rgba(255,255,255,.03)" '+
+      'stroke="'+(S.pk.ok?'var(--line)':'var(--bad)')+'" stroke-width="1.4" stroke-dasharray="'+(S.pk.ok?'0':'7 5')+'"/>'+
+    (ST.size!=='floor'? Array.from({length:Math.max(1,Math.floor(b.h/64))},(_,i)=>
+      '<line x1="6" y1="'+(34+i*64)+'" x2="'+(b.w-6)+'" y2="'+(34+i*64)+'" stroke="var(--line2)" stroke-width="1"/>').join(''):'')+
+    S.pk.placed.map(q=>pedalBody(q.p,q.x,q.y,true)).join('')+
+    '<text x="'+b.w+'" y="'+(b.h+16)+'" text-anchor="end" font-size="11" fill="var(--faint)" '+
+      'font-family="ui-monospace,Menlo,monospace">'+b.w+' × '+b.h+' mm</text>'+
+    '</svg>';
+
+  const chain=S.list.map((p,i)=>
+    '<div class="crow"><div class="pos">'+(i+1)+'</div>'+
+    '<div class="sw2" style="background:'+(p.col||'#444')+'"></div>'+
+    '<div class="n">'+esc(p.n)+' <span style="color:var(--faint)">'+esc(p.b)+'</span></div>'+
+    '<div class="c2">'+esc(CATS[p.c].n)+'</div>'+
+    '<div class="pr mono" style="color:var(--dim);font-size:13px">'+money(price(p))+'</div>'+
+    '<button class="x" data-add="'+p.i+'" title="Remove">×</button></div>').join('');
+
+  return '<div class="sec"><div class="lbl">Board<span class="r">'+
+      '<button class="btn" id="clrboard" style="padding:3px 9px">clear board</button></span></div>'+
+      '<select id="bsel">'+BOARDS.map(x=>'<option value="'+x.i+'"'+(x.i===ST.size?' selected':'')+'>'+
+        esc(x.n)+' — '+x.w+'×'+x.h+'mm'+(x.p?' · '+money(x.p):'')+'</option>').join('')+'</select>'+
+    '<div class="boardwrap">'+svg+'</div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="lbl">Pedals</div><div class="v">'+S.list.length+'</div></div>'+
+      '<div class="stat"><div class="lbl">Total cost</div><div class="v">'+money(S.cost)+'</div></div>'+
+      '<div class="stat"><div class="lbl">Power draw</div><div class="v">'+S.ma+'<small>mA</small></div></div>'+
+      '<div class="stat"><div class="lbl">Board used</div><div class="v">'+S.fill+'<small>%</small></div></div>'+
+      '<div class="stat"><div class="lbl">Patch cables</div><div class="v">'+S.cables+'</div></div>'+
+      '<div class="stat"><div class="lbl">Fits</div><div class="v '+(S.pk.ok?'ok':'no')+'">'+(S.pk.ok?'yes':'no')+'</div></div>'+
+    '</div>'+
+    (!S.pk.ok?'<div class="notes" style="margin-top:14px"><div class="note warn"><b></b><span>This will not fit a '+
+      esc(b.n)+'. It needs about '+Math.ceil(S.pk.usedH)+'mm of depth and the board gives you '+b.h+'mm. '+
+      'Go up a board size, or swap something for a mini enclosure.</span></div></div>':'')+
+    (S.ma>500?'<div class="notes" style="margin-top:10px"><div class="note warn"><b></b><span>'+S.ma+
+      'mA is past what a small daisy-chain supply will give you. You want an isolated supply — and the digital pedals here should get their own outputs anyway.</span></div></div>':'')+
+    '<div class="sec"><div class="lbl">Signal chain<span class="r">guitar in at 1, amp out at '+S.list.length+'</span></div>'+
+      '<div class="chainlist">'+chain+'</div></div>'+
+    '<div class="foot">Enclosures are drawn to true relative size from published dimensions, so the layout above reflects real board space. '+
+      'They are illustrations, not photographs — colour and knob layout are approximations. '+
+      'Power figures are typical for each pedal or its category; check the pedal’s own spec before sizing a supply.</div>';
+}
+
+/* ---------- LEARN ----------------------------------------------------- */
+const GLOSSARY=[
+ ['True bypass vs buffered','True bypass disconnects the pedal completely when off. A buffer keeps a small always-on circuit that protects your signal over long cable runs. Neither is better — an all-true-bypass board with lots of cable loses treble, and a buffer in front of a vintage fuzz makes it choke.'],
+ ['mA and daisy chains','Every pedal draws current. A cheap daisy-chain supply gives you a few hundred mA total shared between everything, and shares a ground, which is where hum comes from. Digital pedals (reverb, delay, multi) draw far more than analog ones. Once you pass about 500mA or add a digital pedal, get an isolated supply.'],
+ ['Stacking','Running one dirt pedal into another. The usual recipe is a lower-gain pedal pushing a higher-gain one — a boost or Screamer into an overdrive — to tighten and add volume without doubling the fuzz.'],
+ ['Gain staging','How hard each stage hits the next. Too much gain early means everything after it is working with an already-squashed signal. If your board sounds muddy, turn something down before you buy anything.'],
+ ['Effects loop','A send and return that sits after the amp’s own distortion. Time-based effects belong there when the amp is making the gain, otherwise you are reverberating a clean signal and then distorting the reverb.'],
+ ['Headroom','How loud an amp gets before it distorts on its own. High headroom is a blank canvas for pedals; low headroom means the amp has an opinion and your pedals have to work with it.'],
+ ['Transparent vs amp-in-a-box','A transparent drive keeps your amp’s character and adds edge. An amp-in-a-box replaces that character with its own. Which one you want depends entirely on whether you like your amp.'],
+ ['Kill dry','On reverbs and delays, muting the original signal so only the effect passes. Used for parallel rigs and for pad-style ambient sounds.'],
+ ['Why used is worth it','Pedals are simple, sealed and almost impossible to wear out. A used pedal at 65–70% of new is normally the same pedal. This app has a Used toggle for exactly that reason.']
+];
+const SHORT={tuner:'Tuner',filter:'Wah',fuzz:'Fuzz',comp:'Comp',pitch:'Octave',od:'Drive',dist:'Dist',
+  boost:'Boost',eq:'EQ',util:'Noise',mod:'Mod',delay:'Delay',verb:'Reverb',multi:'Multi',loop:'Loop'};
+function viewLearn(){
+  const a=amp();
+  const order=Object.keys(CATS).sort((x,y)=>CATS[x].o-CATS[y].o);
+  const strip='<svg viewBox="0 0 '+(order.length*74)+' 46" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:820px">'+
+    order.map((c,i)=>{
+      const x=i*74+6;
+      return '<rect x="'+x+'" y="10" width="58" height="26" rx="5" fill="var(--panel)" stroke="var(--line2)"/>'+
+        '<text x="'+(x+29)+'" y="26" text-anchor="middle" font-size="8" fill="var(--dim)" '+
+        'font-family="-apple-system,system-ui,sans-serif">'+esc(SHORT[c])+'</text>'+
+        (i<order.length-1?'<path d="M'+(x+62)+' 23 l6 0 m-2.5 -2.5 l2.5 2.5 l-2.5 2.5" stroke="var(--faint)" fill="none" stroke-width="1"/>':'');
+    }).join('')+'</svg>';
+
+  const cards=order.map(c=>{
+    const inAmp = c==='verb' && !a.verb ? 'The '+a.n+' has none of its own — this is a real gap on your rig.'
+      : (a.fx && (TIME.includes(c)||c==='mod'||c==='multi')) ? 'The '+a.n+' already does this in software.'
+      : (c==='boost' && a.head==='gain') ? 'The most useful pedal type for an amp like yours.'
+      : (c==='boost' && a.w && a.w<=20) ? 'Less useful at bedroom volume than the internet suggests.'
+      : (c==='dist' && a.head==='high') ? 'On a clean amp this is where your distorted sound has to come from.'
+      : (c==='od' && a.head==='low') ? 'The natural fit for an amp that already breaks up.'
+      : (c==='fuzz' && a.spk && a.spk<=8) ? 'Be careful — most fuzz has more low end than a '+a.spk+'-inch speaker can move.'
+      : '';
+    return '<div class="card"><span class="pos2">CHAIN '+(CATS[c].o+1)+'</span><h3>'+esc(CATS[c].n)+'</h3>'+
+      '<p>'+esc(CATS[c].w)+(inAmp?' <span style="color:var(--acc)">'+esc(inAmp)+'</span>':'')+'</p></div>';
+  }).join('');
+
+  return '<div class="sec"><div class="lbl">Signal chain order<span class="r">guitar on the left, amp on the right</span></div>'+
+      '<div style="overflow-x:auto">'+strip+'</div>'+
+      '<div class="hint" style="margin-top:12px;max-width:74ch">This is the conventional order, not a law. The logic: things that shape your raw signal come first, '+
+      'things that add space come last — you want reverb on your distorted guitar, not distortion on your reverb. '+
+      'Fuzz is the contested one; many players put it before the wah rather than after, and Fuzz Face circuits in particular want to see the guitar directly.</div></div>'+
+    '<div class="sec"><div class="lbl">What each kind actually does<span class="r">notes in colour are specific to your '+esc(a.n)+'</span></div>'+cards+'</div>'+
+    '<div class="sec"><div class="lbl">Terms you will keep running into</div>'+
+      GLOSSARY.map(g=>'<div class="card"><h3>'+esc(g[0])+'</h3><p>'+esc(g[1])+'</p></div>').join('')+'</div>';
+}
+
+/* ---------- GEAR ------------------------------------------------------ */
+function viewGear(){
+  return '<div class="sec"><div class="lbl">Your amp<span class="r">everything else on this app is tuned to this choice</span></div>'+
+    '<div class="ampgrid">'+AMPS.map(x=>{
+      const sp=[];
+      sp.push(x.kind==='tube'?'tube':x.kind==='ss'?'solid state':'modelling');
+      if(x.w) sp.push(x.w+'W'); if(x.spk) sp.push(x.spk+'" spk');
+      sp.push(x.loop?'fx loop':'no loop');
+      sp.push(x.verb?'reverb':'no reverb');
+      if(x.fx) sp.push('built-in fx');
+      sp.push(x.head==='high'?'clean platform':x.head==='low'?'breaks up early':x.head==='gain'?'high gain':'medium headroom');
+      return '<button class="amp" data-amp="'+x.i+'" aria-pressed="'+(x.i===ST.amp)+'">'+
+        '<div class="an">'+esc(x.n)+'</div><div class="ab">'+esc(x.b||'generic')+'</div>'+
+        '<div class="ad">'+esc(x.d)+'</div>'+
+        '<div class="specs">'+sp.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div></button>';
+    }).join('')+'</div>'+
+    '<div class="foot">Amp specs here drive the recommendations directly: headroom decides whether a drive pedal should make its own voice or push your amp, '+
+    'speaker size decides whether a big fuzz will flub out, an effects loop decides where delay and reverb belong, and a built-in effects library decides '+
+    'whether buying a reverb pedal is worth it at all. Change the amp and the whole Find tab re-ranks.</div></div>';
+}
+
+/* ===== SHELL + WIRING ================================================== */
+function applyTheme(){
+  document.documentElement.setAttribute('data-t',ST.theme);
+  const m=document.querySelector('meta[name=theme-color]');
+  if(m) m.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#14070d');
+  document.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',b.dataset.th===ST.theme));
+}
+const TABS=[['find','Find'],['board','Board'],['learn','Learn'],['gear','Gear']];
+
+function render(){
+  document.querySelectorAll('.tb').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===ST.tab));
+  const el=$('#main');
+  el.innerHTML = ST.tab==='find'?viewFind() : ST.tab==='board'?viewBoard() :
+                 ST.tab==='learn'?viewLearn() : viewGear();
+  if(ST.tab==='find') syncFill();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function syncFill(){
+  const f=$('#pfill'); if(!f) return;
+  const lo=Math.min(ST.min,ST.max)/PMAX*100, hi=Math.max(ST.min,ST.max)/PMAX*100;
+  f.style.left=lo+'%'; f.style.width=(hi-lo)+'%';
+}
+function save(){
+  ['tab','theme','amp','tones','cat','min','max','used','board','size'].forEach(k=>store.set(k,ST[k]));
+}
+function go(patch){ Object.assign(ST,patch); save(); render(); }
+
+function boot(){
+  $('#swatches').innerHTML = THEMES.map(t=>
+    '<button class="sw" data-th="'+t[0]+'" title="'+t[0]+'" '+
+    'style="background:linear-gradient(120deg,'+t[1]+','+t[2]+')"></button>').join('');
+  $('#nav').innerHTML = TABS.map(t=>
+    '<button class="tb" data-tab="'+t[0]+'">'+t[1]+'</button>').join('');
+  applyTheme(); render();
+
+  document.addEventListener('click',e=>{
+    const t=e.target.closest('[data-th],[data-tab],[data-cat],[data-tone],[data-used],[data-add],[data-amp],[data-open],#clrtone,#clrboard');
+    if(!t) return;
+
+    if(t.dataset.th){ ST.theme=t.dataset.th; save(); applyTheme(); return; }
+    if(t.dataset.tab){ go({tab:t.dataset.tab, open:null}); return; }
+    if(t.id==='clrtone'){ go({tones:[]}); return; }
+    if(t.id==='clrboard'){ go({board:[]}); return; }
+    if(t.dataset.cat){ go({cat:t.dataset.cat, open:null}); return; }
+    if(t.dataset.tone){
+      const v=t.dataset.tone;
+      go({tones: ST.tones.includes(v)?ST.tones.filter(x=>x!==v):ST.tones.concat([v]), open:null});
+      return;
+    }
+    if(t.dataset.used!==undefined && t.dataset.used!==''){ go({used:t.dataset.used==='1'}); return; }
+    if(t.dataset.amp){ go({amp:t.dataset.amp}); return; }
+    if(t.dataset.add){
+      const id=t.dataset.add;
+      go({board: ST.board.includes(id)?ST.board.filter(x=>x!==id):ST.board.concat([id])});
+      return;
+    }
+    if(t.dataset.open){ go({open: ST.open===t.dataset.open?null:t.dataset.open}); return; }
+  });
+
+  document.addEventListener('change',e=>{
+    if(e.target.id==='ampsel') go({amp:e.target.value});
+    if(e.target.id==='bsel')   go({size:e.target.value});
+  });
+
+  document.addEventListener('input',e=>{
+    const id=e.target.id;
+    if(id==='rmin'||id==='rmax'||id==='pmin'||id==='pmax'){
+      let v=Math.max(0,Math.min(PMAX,parseInt(e.target.value||'0',10)||0));
+      if(id==='rmin'||id==='pmin') ST.min=v; else ST.max=v;
+      if(ST.min>ST.max){ if(id==='rmin'||id==='pmin') ST.max=ST.min; else ST.min=ST.max; }
+      const rn=$('#rmin'),rx=$('#rmax'),pn=$('#pmin'),px=$('#pmax');
+      if(rn) rn.value=ST.min; if(rx) rx.value=ST.max;
+      if(pn && document.activeElement!==pn) pn.value=ST.min;
+      if(px && document.activeElement!==px) px.value=ST.max;
+      syncFill();
+      clearTimeout(window.__pt);
+      window.__pt=setTimeout(()=>{ save(); render(); },220);
+    }
+  });
+}
+if(location.protocol==='https:' && 'serviceWorker' in navigator){
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+document.addEventListener('DOMContentLoaded',boot);
+</script>
