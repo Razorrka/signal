@@ -1,5 +1,5 @@
-const CACHE='signal-202608180238';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-180.png'];
+const CACHE='signal-202608180359';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./catalog.min.json','./icon-192.png','./icon-512.png','./icon-180.png'];
 self.addEventListener('install',e=>{
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));

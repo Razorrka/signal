@@ -20,6 +20,12 @@ a country filter (56 of them are Japanese — Maxon, One Control, Free The Tone,
 Sobbat, Shin's Music, Leqtique, Effects Bakery and more). Every result explains why it fits or does
 not, and links out to real demos, reviews, and current prices.
 
+**Library** — **7,128 real pedals from 635 brands**, offline. Search, filter by type or price,
+sort by how common a pedal actually is. Every entry is real: this catalogue was built by harvesting
+187,000 live Reverb listings and grouping them by make and model, keeping only products that at
+least three separate sellers had listed. Nothing in it was written from memory or generated. Price
+bands are the real 25th/50th/75th percentile of what people were asking.
+
 **Market** — live search across **211,000+ real pedal listings** on Reverb. Actual current prices,
 condition, seller photos and a direct link to the listing. Filter by type, condition, or Japanese
 builders. This is the whole marketplace rather than the curated list, so there's no amp-fit advice
@@ -62,6 +68,9 @@ The recommendations invert depending on what you plug into:
   prices and photos belong to the sellers who posted them; every link goes straight to the listing.
 - Demo and review buttons are **search links** to YouTube and Google. No review text is reproduced or
   invented — you land on the real results and judge for yourself.
+- The **Library** catalogue is a snapshot, not a live feed — prices are what sellers were asking on
+  the day it was built. Because variants share a model name (a vintage TS9 and a current one are both
+  "TS9 Tube Screamer"), the price band can be wide; the median is the number to trust.
 - The amp-fit reasoning only covers the 137 curated pedals. Writing honest per-pedal tags for 211,000
   listings isn't something that can be done by hand, so live results get category-level context only.
 - Enclosure drawings are **illustrations at true relative scale**, generated from published

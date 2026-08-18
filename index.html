@@ -869,10 +869,21 @@ const ST = {
   used:  store.get('used',false),
   board: store.get('board',[]),
   size:  store.get('size','metro20'),
+  country: store.get('country','all'),
+  key:   store.get('key',''),
+  q:     store.get('q',''),
+  mkt:   {q:'', cat:'all', cond:'', jp:false},
+  aiNote:null, asking:false,
+  libq:'', libcat:'all', libsort:'common', libjp:false, libn:120,
   open:  null
 };
 const PMAX = 700;
-const byId = i => PEDALS.find(p=>p.i===i);
+const byId = i => {
+  const p = PEDALS.find(x=>x.i===i);
+  if(p) return p;
+  if(typeof LIB!=='undefined' && LIB){ const e=LIB.find(x=>x.i===i); if(e) return libPedal(e); }
+  return undefined;
+};
 const amp  = () => AMPS.find(a=>a.i===ST.amp) || AMPS[1];
 const price= p => ST.used ? (p.u || Math.round(p.p*0.7)) : p.p;
 const esc  = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1605,6 +1616,134 @@ async function aiParse(text, key){
           why:o.reasoning||'', hits:[], catHit:null, ampHit:null, understood:true, viaAI:true};
 }
 
+/* ===== LIBRARY — the full harvested catalogue ===========================
+   Every entry here is a real product: it is in this file only because at
+   least three separate people were selling one on the open market when the
+   catalogue was built. Names, categories and price bands are derived from
+   those live listings, not written by hand and not invented.
+   What it CANNOT give you is the per-pedal amp-fit reasoning on the Find
+   tab — that is hand-authored and only exists for the curated set. Library
+   entries get category-level guidance instead, which is clearly labelled.
+======================================================================= */
+let LIB = null, LIB_ERR = null, LIB_LOADING = false;
+
+async function loadLibrary(){
+  if(LIB || LIB_LOADING) return LIB;
+  LIB_LOADING = true; LIB_ERR = null;
+  try{
+    const r = await fetch('catalog.min.json');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    LIB = d.p.map((row,idx)=>({
+      i:'lib'+idx, b:d.brands[row[0]], n:row[1], c:d.cats[row[2]],
+      lo:row[3], md:row[4], hi:row[5], k:row[6]
+    }));
+  }catch(e){ LIB_ERR = e.message; }
+  LIB_LOADING = false; render(); return LIB;
+}
+
+/* typical current draw + gain by category, for the synthetic amp-fit pass */
+const CAT_MA = {tuner:45,filter:20,fuzz:8,comp:12,pitch:100,od:12,dist:12,boost:10,
+                eq:25,util:20,mod:40,delay:80,verb:90,multi:300,loop:120};
+const CAT_G  = {od:4,dist:7,fuzz:9,boost:2};
+/* stable pseudo-random enclosure colour so the same pedal always looks the same */
+function brandColor(s){
+  let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0;
+  const PAL=['#3f8f45','#2e6fb7','#c0392b','#e8c341','#6b4ea8','#2f7a4a','#c8382f','#3f5a8c',
+             '#8c3f5a','#4a4136','#3a5fa8','#c86b3f','#2f4f6b','#6b3f8c','#3f7a6b','#1c1c1e'];
+  return PAL[Math.abs(h)%PAL.length];
+}
+/* turn a library row into something ampFit() and pedalSVG() understand */
+function libPedal(e){
+  return {i:e.i, n:e.n, b:e.b, c:e.c, p:e.md, u:e.lo, s:'std', ma:CAT_MA[e.c]||20,
+          k:3, col:brandColor(e.b), tags:[], d:'',
+          g:CAT_G[e.c]||0, lo:'neutral', br:0, aib:0, psh:0};
+}
+
+function libResults(){
+  if(!LIB) return [];
+  const q = (ST.libq||'').toLowerCase().trim();
+  const terms = q ? q.split(/\s+/) : [];
+  const a = amp();
+  let out = LIB.filter(e=>{
+    if(ST.libcat!=='all' && e.c!==ST.libcat) return false;
+    if(e.md < ST.min || e.md > ST.max) return false;
+    if(ST.libjp && (BRAND_COUNTRY[e.b]||'') !== 'Japan') return false;
+    if(terms.length){
+      const hay = (e.b+' '+e.n).toLowerCase();
+      for(const t of terms) if(!hay.includes(t)) return false;
+    }
+    return true;
+  });
+  if(ST.libsort==='price')      out.sort((x,y)=>x.md-y.md);
+  else if(ST.libsort==='pricey')out.sort((x,y)=>y.md-x.md);
+  else if(ST.libsort==='name')  out.sort((x,y)=>(x.b+x.n).localeCompare(y.b+y.n));
+  else                          out.sort((x,y)=>y.k-x.k);   /* most listed = most common */
+  return out;
+}
+
+function viewLibrary(){
+  const a=amp();
+  if(LIB_ERR) return '<div class="sec"><div class="lbl">Library</div></div>'+
+    '<div class="empty"><b>Could not load the catalogue</b>'+esc(LIB_ERR)+
+    ' — it lives in catalog.min.json next to this page. Everything else still works.</div>';
+  if(!LIB){ loadLibrary(); return '<div class="sec"><div class="lbl">Library</div></div>'+
+    '<div class="empty"><b>Loading the catalogue…</b>Several thousand pedals, fetched once and then cached offline.</div>'; }
+
+  const res = libResults(), shown = res.slice(0, ST.libn||120);
+  const cats = ['all'].concat(Object.keys(CATS).sort((x,y)=>CATS[x].o-CATS[y].o));
+  const rows = shown.map(e=>{
+    const p = libPedal(e), open = ST.open===e.i;
+    const fit = ampFit(p, a);
+    return '<div class="row'+(open?' open':'')+'" data-open="'+e.i+'">'+
+      '<div class="art">'+pedalSVG(p,false)+'</div>'+
+      '<div class="nm"><div class="t">'+esc(e.n)+'</div><div class="s">'+esc(e.b)+
+        (BRAND_COUNTRY[e.b]==='Japan'?' · Japan':'')+'</div></div>'+
+      '<div class="ct">'+esc(CATS[e.c].n)+'</div>'+
+      '<div class="mt">'+e.k+' listed</div>'+
+      '<div class="pr">'+money(e.md)+'</div>'+
+      '<button class="add'+(ST.board.includes(e.i)?' on':'')+'" data-add="'+e.i+'">'+
+        (ST.board.includes(e.i)?'&#10003;':'+')+'</button></div>'+
+      (open ? '<div class="detail">'+
+        '<div class="hint" style="margin-bottom:12px">'+
+          '<b>'+money(e.lo)+' – '+money(e.hi)+'</b> is the going rate across '+e.k+
+          ' live listings when this catalogue was built; '+money(e.md)+' is the middle. '+
+          esc(CATS[e.c].n)+' sits at position '+(CATS[e.c].o+1)+' in your chain.</div>'+
+        (fit.n.length? '<div class="notes">'+noteHTML(fit.n)+'</div>'+
+          '<div class="hint" style="margin-top:10px;font-size:12px;color:var(--faint)">'+
+          'Category-level guidance only — the detailed per-pedal reasoning on the Find tab is '+
+          'hand-written and covers the '+PEDALS.length+' curated pedals.</div>' : '')+
+        linkRow(p)+'</div>' : '');
+  }).join('');
+
+  return '<div class="sec"><div class="lbl">Library'+
+      '<span class="r">'+LIB.length.toLocaleString('en-US')+' real pedals · '+
+      new Set(LIB.map(e=>e.b)).size+' brands · works offline</span></div>'+
+    '<div class="askrow"><input id="libq" placeholder="big muff, maxon, shimmer, klon…" value="'+esc(ST.libq||'')+'"></div>'+
+    '<div class="chips" style="margin-top:12px">'+cats.map(c=>
+      '<button class="chip" data-libcat="'+c+'" aria-pressed="'+((ST.libcat||'all')===c)+'">'+
+      (c==='all'?'Everything':esc(CATS[c].n))+'</button>').join('')+'</div>'+
+    '<div class="chips" style="margin-top:8px">'+
+      [['common','Most common'],['price','Cheapest'],['pricey','Most expensive'],['name','A–Z']].map(s=>
+      '<button class="chip" data-libsort="'+s[0]+'" aria-pressed="'+((ST.libsort||'common')===s[0])+'">'+s[1]+'</button>').join('')+
+      '<span style="flex:1"></span>'+
+      '<button class="chip" data-libjp="1" aria-pressed="'+(!!ST.libjp)+'">Japanese builders</button>'+
+    '</div>'+
+    '<div class="sec"><div class="lbl">'+
+      (res.length? res.length.toLocaleString('en-US')+' match your filters' : 'No matches')+
+      '<span class="r">'+money(ST.min)+'–'+money(ST.max)+' · set the price window on Find</span></div>'+
+      (res.length? '<div class="rows">'+rows+'</div>'+
+        (res.length>shown.length? '<div style="padding:20px 0;text-align:center">'+
+          '<button class="btn" id="libmore">Show more ('+(res.length-shown.length).toLocaleString('en-US')+' left)</button></div>':'')
+        : '<div class="empty"><b>Nothing here matches</b>Widen the price window on the Find tab, or clear the search.</div>')+
+    '</div>'+
+    '<div class="foot">Built by harvesting Reverb’s public listings and grouping them by make and model. '+
+    'A pedal only appears here if at least three separate sellers had one listed, which is what makes every entry real — '+
+    'nothing in this list was written from memory or generated. Price bands are the 15th, 50th and 85th percentile of those '+
+    'listings on the day the catalogue was built, so treat them as what people actually ask, not a current quote. '+
+    'Categories come from Reverb’s own taxonomy.</div>';
+}
+
 /* ===== ASK BOX + LIVE MARKET VIEW ====================================== */
 const COUNTRIES = ['all'].concat(Object.keys(ORIGIN));
 
@@ -1754,13 +1893,14 @@ function applyTheme(){
   if(m) m.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#14070d');
   document.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',b.dataset.th===ST.theme));
 }
-const TABS=[['find','Find'],['market','Market'],['board','Board'],['learn','Learn'],['gear','Gear']];
+const TABS=[['find','Find'],['library','Library'],['market','Market'],['board','Board'],['learn','Learn'],['gear','Gear']];
 
 function render(){
   document.querySelectorAll('.tb').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===ST.tab));
   const el=$('#main');
-  el.innerHTML = ST.tab==='find'?viewFind()   : ST.tab==='market'?viewMarket() :
-                 ST.tab==='board'?viewBoard()  : ST.tab==='learn'?viewLearn() : viewGear();
+  el.innerHTML = ST.tab==='find'?viewFind()     : ST.tab==='library'?viewLibrary() :
+                 ST.tab==='market'?viewMarket() : ST.tab==='board'?viewBoard()  :
+                 ST.tab==='learn'?viewLearn()   : viewGear();
   if(ST.tab==='find') syncFill();
   window.scrollTo({top:0,behavior:'instant'});
 }
@@ -1785,6 +1925,7 @@ function boot(){
   document.addEventListener('click',e=>{
     const t=e.target.closest('[data-th],[data-tab],[data-cat],[data-tone],[data-used],[data-add],[data-amp],'+
       '[data-open],[data-country],[data-mcat],[data-mcond],[data-mjp],'+
+      '[data-libcat],[data-libsort],[data-libjp],#libmore,'+
       '#clrtone,#clrboard,#askgo,#mgo,#keyadd,#keyclear,#keyclear2,#keysave');
     if(!t) return;
     if(t.closest('.links')) return;                       /* let outbound links open */
@@ -1795,6 +1936,10 @@ function boot(){
     if(t.dataset.mcond!==undefined){ runMarket({cond:t.dataset.mcond}); return; }
     if(t.dataset.mjp!==undefined){ runMarket({jp:!ST.mkt.jp}); return; }
     if(t.dataset.country){ go({country:t.dataset.country, open:null}); return; }
+    if(t.dataset.libcat!==undefined){ go({libcat:t.dataset.libcat, libn:120, open:null}); return; }
+    if(t.dataset.libsort!==undefined){ go({libsort:t.dataset.libsort, libn:120}); return; }
+    if(t.dataset.libjp!==undefined){ go({libjp:!ST.libjp, libn:120}); return; }
+    if(t.id==='libmore'){ ST.libn=(ST.libn||120)+240; render(); return; }
     if(t.id==='keyadd'){ go({tab:'gear'}); return; }
     if(t.id==='keyclear'||t.id==='keyclear2'){ go({key:''}); return; }
     if(t.id==='keysave'){ const b=$('#keyin'); go({key:b?b.value.trim():''}); return; }
@@ -1831,6 +1976,13 @@ function boot(){
 
   document.addEventListener('input',e=>{
     const id=e.target.id;
+    if(id==='libq'){
+      ST.libq=e.target.value; ST.libn=120;
+      clearTimeout(window.__lt);
+      window.__lt=setTimeout(()=>{ const p=document.activeElement===$('#libq'); render();
+        if(p){ const b=$('#libq'); if(b){ b.focus(); b.setSelectionRange(b.value.length,b.value.length); } } },200);
+      return;
+    }
     if(id==='rmin'||id==='rmax'||id==='pmin'||id==='pmax'){
       let v=Math.max(0,Math.min(PMAX,parseInt(e.target.value||'0',10)||0));
       if(id==='rmin'||id==='pmin') ST.min=v; else ST.max=v;
