@@ -254,6 +254,60 @@ html[data-t="paper"] .btn.pri{color:#fff}
   .tag{display:none}
   .detail{padding-left:20px}
 }
+
+/* ============ ASK BOX ================================================== */
+.ask{margin-top:26px;border:1px solid var(--line);border-radius:14px;padding:18px 19px 15px;
+  background:linear-gradient(180deg,var(--panel),transparent 80%)}
+.ask > .lbl{display:flex;align-items:baseline;gap:12px;margin-bottom:11px;flex-wrap:wrap}
+.ask > .lbl .r{margin-left:auto;color:var(--dim);letter-spacing:.02em;text-transform:none;font-size:11.5px}
+.askrow{display:flex;gap:10px;align-items:stretch}
+.askrow textarea,.askrow input{
+  flex:1;min-width:0;background:color-mix(in srgb,var(--bg) 60%,transparent);
+  border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+  font:inherit;font-size:14.5px;line-height:1.5;color:var(--ink);resize:vertical;outline:none;
+}
+.askrow input{font-family:ui-monospace,Menlo,monospace;font-size:13.5px}
+.askrow textarea::placeholder,.askrow input::placeholder{color:var(--faint);opacity:.85}
+.askrow textarea:focus,.askrow input:focus{border-color:var(--acc)}
+.askrow .btn{flex:none;align-self:flex-start;padding:11px 18px}
+.asknote{margin-top:12px;font-size:13.4px;line-height:1.6;color:var(--dim);
+  border-left:2px solid var(--acc);padding-left:12px}
+.asknote.bad{border-left-color:var(--warn)}
+.asknote b{color:var(--ink);font-weight:600}
+.asktags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.asktags i{font-style:normal;font-size:11px;letter-spacing:.04em;color:var(--ink);
+  border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.askfoot{margin-top:12px;padding-top:11px;border-top:1px solid var(--line2);
+  font-size:11.5px;color:var(--faint);line-height:1.6}
+.lnk{color:var(--acc);text-decoration:underline;text-underline-offset:2px;font-size:11.5px;padding:0}
+.lnk:hover{color:var(--ink)}
+
+/* ============ OUTBOUND LINKS ========================================== */
+.links{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.links a{font-size:11.5px;letter-spacing:.03em;color:var(--dim);text-decoration:none;
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;transition:.14s;white-space:nowrap}
+.links a:hover{color:var(--ink);border-color:var(--acc)}
+
+/* ============ MARKET ================================================== */
+.mrows{margin-top:6px}
+.mrow{display:flex;align-items:center;gap:14px;padding:10px 4px;text-decoration:none;color:inherit;
+  border-bottom:1px solid var(--line2);transition:background .13s}
+.mrow:hover{background:var(--panel)}
+.mrow img,.mrow .noimg{width:52px;height:52px;flex:none;border-radius:8px;object-fit:cover;
+  background:var(--panel);border:1px solid var(--line2)}
+.mrow .mn{flex:1;min-width:0}
+.mrow .mn .t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .mn .s{font-size:11.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .ct{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);
+  flex:none;width:104px;text-align:right}
+.mrow .pr{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:14px;width:82px;text-align:right;flex:none}
+@media(max-width:640px){
+  .askrow{flex-wrap:wrap}
+  .askrow .btn{width:100%;align-self:stretch}
+  .mrow .ct{display:none}
+  .ask > .lbl .r{margin-left:0;width:100%}
+}
 </style>
 <header>
   <div class="wrap hrow">
@@ -685,6 +739,119 @@ const AMPS = [
   d:'Straight into a computer with amp sims. Effects are already in software.'}
 ];
 
+/* ===== JAPANESE PEDALS ==================================================
+   Real models from real Japanese builders. Same schema as data1-3.
+   Prices are approximate US street, Aug 2026; JP boutique gear often costs
+   noticeably less bought domestically in Japan (see the Japan tab).
+======================================================================= */
+PEDALS.push(
+/* ── MAXON — built the original Tube Screamer circuits for Ibanez ────── */
+{i:'od808',n:'OD808',b:'Maxon',c:'od',p:180,u:130,s:'std',ma:10,col:'#3f8f45',k:3,g:4,lo:'tight',br:0,psh:1,
+ tags:['warm','smooth','tight','vintage','crunchy'],
+ d:'The original Tube Screamer circuit from the company that actually built them. Smoother and less brittle than a TS9.'},
+{i:'od9',n:'OD9',b:'Maxon',c:'od',p:170,u:120,s:'std',ma:10,col:'#3f8f45',k:3,g:4,lo:'neutral',br:1,psh:1,
+ tags:['warm','crunchy','punchy','vintage'],d:'A touch more open and less mid-humped than the OD808. Same family, more air.'},
+{i:'sd9',n:'SD9 Sonic Distortion',b:'Maxon',c:'dist',p:180,u:130,s:'std',ma:10,col:'#c8382f',k:3,g:6,lo:'neutral',br:1,aib:1,
+ tags:['gritty','crunchy','punchy','vintage'],d:'Fatter and more aggressive than the overdrives, with a strong midrange push.'},
+{i:'ad9',n:'AD9 Analog Delay',b:'Maxon',c:'delay',p:250,u:180,s:'std',ma:20,col:'#3f5a8c',k:3,
+ tags:['warm','dark','vintage','lofi','dreamy'],d:'Classic bucket-brigade delay — warm, darkening repeats, roughly 300ms.'},
+{i:'ad999',n:'AD999 Analog Delay',b:'Maxon',c:'delay',p:330,u:245,s:'wide',ma:40,col:'#3f5a8c',k:4,
+ tags:['warm','dark','vintage','lush','dreamy'],d:'Up to 900ms of true analog delay — unusually long for bucket-brigade, and gorgeous.'},
+{i:'cs9',n:'CS9 Pro Compressor',b:'Maxon',c:'comp',p:180,u:130,s:'std',ma:10,col:'#4a7fc4',k:4,
+ tags:['smooth','transparent','sustaining','punchy'],d:'Clean, musical compression with attack control. Less squash than a Dyna Comp.'},
+
+/* ── PROVIDENCE — premium Japanese build quality ─────────────────────── */
+{i:'sdr4',n:'Sonic Drive SDR-4',b:'Providence',c:'od',p:250,u:180,s:'std',ma:20,col:'#2f4f6b',k:4,g:5,lo:'neutral',br:0,psh:1,aib:1,
+ tags:['transparent','warm','smooth','punchy'],
+ d:'Natural, full-range overdrive that keeps your guitar’s character. Immaculate build, as with everything Providence make.'},
+{i:'adc4',n:'Anadime Chorus ADC-4',b:'Providence',c:'mod',p:290,u:210,s:'std',ma:30,col:'#3f7a8c',k:4,
+ tags:['warm','watery','lush','dreamy','vintage'],d:'True analog bucket-brigade chorus. Warm and three-dimensional rather than glassy.'},
+{i:'dly4',n:'Chrono Delay DLY-4',b:'Providence',c:'delay',p:330,u:240,s:'wide',ma:100,col:'#2f4f6b',k:5,
+ tags:['modern','lush','spacey','shimmering'],d:'Clean digital delay with tap tempo and a very transparent buffer path.'},
+
+/* ── ONE CONTROL — tiny enclosures, BJF (Björn Juhl) circuits ────────── */
+{i:'persiangreen',n:'Persian Green Screamer',b:'One Control',c:'od',p:150,u:105,s:'mini',ma:10,col:'#2f8f6b',k:3,g:4,lo:'neutral',br:0,psh:1,
+ tags:['transparent','warm','small','crunchy','smooth'],
+ d:'A Screamer with the mid-hump relaxed and the low end left intact. One of the best mini overdrives made.'},
+{i:'goldenacorn',n:'Golden Acorn Overdrive',b:'One Control',c:'od',p:160,u:115,s:'mini',ma:10,col:'#c8a13a',k:3,g:3,lo:'neutral',br:1,psh:1,
+ tags:['transparent','glassy','small','subtle'],d:'Very low-gain, very transparent. A tone-shaping always-on rather than a distortion.'},
+{i:'strawberryred',n:'Strawberry Red Overdrive',b:'One Control',c:'od',p:150,u:105,s:'mini',ma:10,col:'#c8382f',k:3,g:5,lo:'neutral',br:0,psh:1,aib:1,
+ tags:['warm','crunchy','small','punchy'],d:'Fatter and more driven than the Persian Green. Amp-like breakup in a tiny box.'},
+{i:'babyblue',n:'Baby Blue Overdrive',b:'One Control',c:'od',p:160,u:115,s:'mini',ma:10,col:'#6fa8dc',k:3,g:3,lo:'tight',br:1,psh:1,
+ tags:['glassy','transparent','small','subtle','bright'],d:'Bright, clear and gentle. Built for adding sparkle to a dark amp.'},
+{i:'purplehumper',n:'Purple Humper',b:'One Control',c:'boost',p:150,u:105,s:'mini',ma:10,col:'#8c5fa8',k:1,g:2,lo:'neutral',br:0,psh:1,
+ tags:['punchy','subtle','small','warm'],d:'A midrange bump rather than a flat boost. Makes a thin amp sound thick and cuts through a band.'},
+{i:'bluemonger',n:'Dimension Blue Monger',b:'One Control',c:'mod',p:180,u:130,s:'mini',ma:20,col:'#3a5fa8',k:1,
+ tags:['lush','watery','dreamy','small','shimmering'],d:'Dimension-C style chorus — four preset widths, no rate knob, all of them beautiful.'},
+
+/* ── FREE THE TONE — high-end Japanese studio gear ───────────────────── */
+{i:'ambispace',n:'Ambi Space AS-1R',b:'Free The Tone',c:'verb',p:450,u:340,s:'wide',ma:200,col:'#2a2a3a',k:5,
+ tags:['ambient','lush','washy','dreamy','shimmering','modern'],
+ d:'Studio-grade digital reverb with real spatial depth. Expensive, and audibly so.'},
+{i:'silkycomp',n:'Silky Comp SC-1',b:'Free The Tone',c:'comp',p:350,u:260,s:'std',ma:100,col:'#c8c8cc',k:4,
+ tags:['smooth','transparent','subtle','sustaining'],d:'Almost invisible compression that just makes everything feel more even.'},
+{i:'futurefactory',n:'Future Factory RF-1V',b:'Free The Tone',c:'delay',p:500,u:380,s:'xl',ma:250,col:'#2a2a3a',k:6,
+ tags:['spacey','modern','extreme','ambient','shimmering'],
+ d:'A delay built around randomised, drifting repeats. Not a slapback box — a texture generator.'},
+
+/* ── VEMURAM — machined-aluminium, hand-wired, expensive ─────────────── */
+{i:'janray',n:'Jan Ray',b:'Vemuram',c:'od',p:400,u:300,s:'std',ma:8,col:'#c8a13a',k:4,g:3,lo:'neutral',br:1,psh:1,aib:0,
+ tags:['transparent','warm','glassy','smooth','vintage'],
+ d:'Aims at the "magic" blackface Fender clean-edge sound. Very low gain, gorgeous, and priced like jewellery.'},
+{i:'myriadfuzz',n:'Myriad Fuzz',b:'Vemuram',c:'fuzz',p:450,u:340,s:'std',ma:8,col:'#8b1a1a',k:4,g:8,lo:'neutral',br:0,aib:1,
+ tags:['fuzzy','smooth','sustaining','vintage','warm'],d:'A refined, controllable fuzz that cleans up well — the opposite of chaos-fuzz.'},
+{i:'karen',n:'Karen',b:'Vemuram',c:'od',p:400,u:300,s:'std',ma:8,col:'#d8d8dc',k:3,g:4,lo:'neutral',br:0,psh:1,
+ tags:['transparent','warm','smooth','subtle'],d:'Low-gain transparent drive with a slightly compressed, singing feel.'},
+
+/* ── OTHER JAPANESE BUILDERS ─────────────────────────────────────────── */
+{i:'dumbloid',n:'Dumbloid',b:"Shin's Music",c:'od',p:500,u:380,s:'std',ma:10,col:'#4a4136',k:4,g:5,lo:'neutral',br:0,psh:1,aib:1,
+ tags:['smooth','warm','sustaining','transparent'],
+ d:'Chases the Dumble amp sound — smooth, singing, endlessly sustaining. A cult object.'},
+{i:'db1',n:'Drive Breaker DB-1',b:'Sobbat',c:'od',p:200,u:145,s:'std',ma:10,col:'#3f6b8c',k:3,g:5,lo:'neutral',br:0,psh:1,aib:1,
+ tags:['warm','crunchy','punchy','vintage'],d:'Long-running Kyoto-built overdrive. Thick, midrange-forward, very musical.'},
+{i:'db2',n:'Drive Breaker DB-2',b:'Sobbat',c:'dist',p:200,u:145,s:'std',ma:10,col:'#8c3f5a',k:3,g:7,lo:'neutral',br:1,aib:1,
+ tags:['gritty','crunchy','sustaining','punchy'],d:'The higher-gain sibling of the DB-1. More saturation, same character.'},
+{i:'animato',n:'Animato',b:'Human Gear',c:'od',p:400,u:300,s:'std',ma:10,col:'#d8d4c8',k:4,g:5,lo:'neutral',br:0,psh:1,aib:1,
+ tags:['transparent','smooth','warm','sustaining'],d:'Legendary among Japanese session players. Extremely touch-responsive and hard to find.'},
+{i:'maestoso',n:'Maestoso',b:'Leqtique',c:'od',p:200,u:145,s:'mini',ma:10,col:'#2a2a2e',k:3,g:4,lo:'neutral',br:1,psh:1,
+ tags:['transparent','glassy','small','punchy'],d:'Boutique Japanese drive in a tiny enclosure. Clear, open and articulate.'},
+{i:'anpan',n:'Anpan Overdrive',b:'Effects Bakery',c:'od',p:60,u:40,s:'mini',ma:10,col:'#c88a4a',k:3,g:4,lo:'neutral',br:0,psh:1,
+ tags:['budget','warm','crunchy','small'],
+ d:'Bread-themed budget pedals from Tokyo. Genuinely decent circuits at pocket-money prices.'},
+{i:'croissant',n:'Croissant Distortion',b:'Effects Bakery',c:'dist',p:65,u:45,s:'mini',ma:10,col:'#e0b060',k:3,g:6,lo:'neutral',br:1,aib:1,
+ tags:['budget','gritty','small','crunchy'],d:'Cheap, small, and far better than the price and the pastry branding suggest.'},
+{i:'teiscoboost',n:'Boost',b:'Teisco',c:'boost',p:100,u:70,s:'std',ma:10,col:'#3f4a52',k:2,g:2,lo:'neutral',br:1,psh:1,
+ tags:['vintage','warm','budget','subtle'],d:'From the revived Japanese brand. Simple, retro-styled and inexpensive.'},
+{i:'teiscofuzz',n:'Fuzz',b:'Teisco',c:'fuzz',p:130,u:90,s:'std',ma:10,col:'#3f4a52',k:3,g:8,lo:'neutral',br:0,aib:1,
+ tags:['fuzzy','vintage','gritty','budget'],d:'Retro-voiced fuzz with a broad tone range. Good value for the character.'},
+{i:'teiscodelay',n:'Delay',b:'Teisco',c:'delay',p:130,u:90,s:'std',ma:20,col:'#3f4a52',k:3,
+ tags:['warm','vintage','lofi','budget'],d:'Simple, warm-voiced delay in the same retro line.'}
+);
+
+/* ===== BRAND ORIGINS — powers the country filter ====================== */
+const ORIGIN = {
+  Japan:['Boss','Ibanez','Maxon','Providence','One Control','Free The Tone','Vemuram',
+         "Shin's Music",'Sobbat','Human Gear','Leqtique','Effects Bakery','Teisco','Zoom','Korg',
+         'Roland','Guyatone','Animals Pedal','Ovaltone','Xotic'],
+  USA:['MXR','Dunlop','Electro-Harmonix','ProCo','Fulltone','JHS','Wampler','Walrus Audio',
+       'EarthQuaker Devices','Keeley','Strymon','Old Blood Noise','Neunaber','Death By Audio',
+       'ZVEX','Way Huge','Friedman','Suhr','Fender','DigiTech','Line 6','Catalinbread',
+       'Source Audio','Seymour Duncan','Chase Bliss','Meris','Red Panda','Beetronics'],
+  UK:['Orange','Marshall','Blackstar','Origin Effects','ThorpyFX','Hudson','Sola Sound','Vox','Laney'],
+  Denmark:['TC Electronic'],
+  Germany:['Nobels','Behringer'],
+  China:['Joyo','Donner','Hotone','Mooer','NUX','Caline','Rowin','Valeton'],
+  Canada:['Empress','Dr. Scientist'],
+  Sweden:['BJFE'],
+  Other:["D'Addario",'EVH','Positive Grid']
+};
+const BRAND_COUNTRY = {};
+Object.keys(ORIGIN).forEach(k => ORIGIN[k].forEach(b => BRAND_COUNTRY[b] = k));
+const countryOf = p => BRAND_COUNTRY[p.b] || 'Other';
+
+/* Xotic is US-operated but Japanese-founded; Behringer is a German company
+   manufacturing in China. Both are judgement calls, not hard facts. */
+
 /* ===== STATE ============================================================ */
 const K = 'sig-';
 const store = {
@@ -909,6 +1076,7 @@ function results(){
   const a=amp(), sel=ST.tones, out=[];
   for(const p of PEDALS){
     if(ST.cat!=='all' && p.c!==ST.cat) continue;
+    if(ST.country && ST.country!=='all' && countryOf(p)!==ST.country) continue;
     const pr=price(p);
     if(pr<ST.min || pr>ST.max) continue;
     const matched = sel.filter(t=>(p.tags||[]).includes(t));
@@ -1010,6 +1178,7 @@ function viewFind(){
             '<button class="btn '+(ST.board.includes(top.p.i)?'':'pri')+'" data-add="'+top.p.i+'">'+
             (ST.board.includes(top.p.i)?'On your board':'Add to board')+'</button></div>'+
         '</div>'+
+        linkRow(top.p)+
         (top.notes.length?'<div class="notes">'+noteHTML(top.notes)+'</div>':
           '<div class="notes"><div class="note info"><b></b><span>Nothing about the '+esc(a.n)+
           ' argues for or against this one — it will do what it says.</span></div></div>')+
@@ -1028,12 +1197,13 @@ function viewFind(){
       '<div class="pr">'+money(o.pr)+'</div>'+
       '<button class="add'+(on?' on':'')+'" data-add="'+o.p.i+'" title="'+(on?'Remove from board':'Add to board')+'">'+
         (on?'&#10003;':'+')+'</button></div>'+
-      (ST.open===o.p.i ? '<div class="detail"><div class="desc">'+esc(o.p.d)+'</div>'+
+      (ST.open===o.p.i ? '<div class="detail"><div class="desc">'+esc(o.p.d)+'</div>'+linkRow(o.p)+
         (o.notes.length?'<div class="notes">'+noteHTML(o.notes)+'</div>':
          '<div class="hint">No strong interaction with the '+esc(a.n)+' either way.</div>')+'</div>' : '');
   }).join('');
 
-  return '<div class="sec"><div class="lbl">Playing through'+
+  return askBox()+
+    '<div class="sec"><div class="lbl">Playing through'+
       '<span class="r">'+esc(a.d)+'</span></div>'+
       '<select id="ampsel">'+AMPS.map(x=>'<option value="'+x.i+'"'+(x.i===ST.amp?' selected':'')+'>'+
         esc((x.b?x.b+' ':'')+x.n)+'</option>').join('')+'</select></div>'+
@@ -1050,6 +1220,10 @@ function viewFind(){
       '</div></div>'+
 
     '<div class="sec"><div class="lbl">Kind of pedal</div><div class="chips" id="cats">'+catChips+'</div></div>'+
+    '<div class="sec"><div class="lbl">Where it is built'+
+      '<span class="r">Japanese builders are a whole world of their own</span></div>'+
+      '<div class="chips">'+COUNTRIES.map(c=>'<button class="chip" data-country="'+c+'" aria-pressed="'+
+        ((ST.country||'all')===c)+'">'+(c==='all'?'Anywhere':esc(c))+'</button>').join('')+'</div></div>'+
     '<div class="sec"><div class="lbl">What should it sound like'+
       (ST.tones.length?'<span class="r"><button class="btn" id="clrtone" style="padding:3px 9px">clear '+ST.tones.length+'</button></span>':'')+
       '</div>'+toneChips+'</div>'+
@@ -1175,9 +1349,402 @@ function viewGear(){
         '<div class="ad">'+esc(x.d)+'</div>'+
         '<div class="specs">'+sp.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div></button>';
     }).join('')+'</div>'+
+    '<div class="sec"><div class="lbl">Claude API key<span class="r">optional — the sound box works without it</span></div>'+
+      '<div class="card"><p>The <b>Describe the sound you want</b> box on the Find tab runs offline by default, matching your '+
+      'words against a built-in vocabulary. That covers most descriptions and costs nothing.</p>'+
+      '<p style="margin-top:10px">If you have your own Anthropic API key you can paste it here and Claude will handle the '+
+      'descriptions the offline matcher misses. The key is stored only in this browser’s local storage, is sent only to '+
+      'api.anthropic.com, and is never sent anywhere else — but anything in local storage is readable by scripts on this '+
+      'page, so only do this on a device you control, and use a key you can revoke.</p>'+
+      '<div class="askrow" style="margin-top:14px">'+
+        '<input id="keyin" type="password" class="mono" placeholder="sk-ant-…" value="'+esc(ST.key||'')+'" autocomplete="off">'+
+        '<button class="btn'+(ST.key?'':' pri')+'" id="keysave">'+(ST.key?'Update':'Save key')+'</button>'+
+        (ST.key?'<button class="btn" id="keyclear2">Remove</button>':'')+
+      '</div></div></div>'+
     '<div class="foot">Amp specs here drive the recommendations directly: headroom decides whether a drive pedal should make its own voice or push your amp, '+
     'speaker size decides whether a big fuzz will flub out, an effects loop decides where delay and reverb belong, and a built-in effects library decides '+
     'whether buying a reverb pedal is worth it at all. Change the amp and the whole Find tab re-ranks.</div></div>';
+}
+
+/* ===== LIVE MARKET LAYER — Reverb =======================================
+   Public read endpoint, no key, CORS-open. 211k+ live pedal listings.
+   Undocumented for anonymous use: it can start requiring a token at any
+   time, so every call fails soft and the curated core keeps working offline.
+======================================================================= */
+const RVB = 'https://api.reverb.com/api/listings';
+
+/* my category -> Reverb slug. VERIFIED against the live API: an unknown slug
+   is silently ignored and returns all 211k listings, so never guess one. */
+const RVB_CAT = {
+  od:'overdrive-and-boost', boost:'overdrive-and-boost', dist:'distortion',
+  fuzz:'fuzz', delay:'delay', verb:'reverb', mod:'chorus-and-vibrato',
+  comp:'compression-and-sustain', pitch:'octave-and-pitch', filter:'wahs-and-filters',
+  loop:'loop-pedals-and-samplers', tuner:'tuning-pedals', multi:'multi-effect-unit',
+  eq:'eq', util:'noise-generators'
+};
+const RVB_SLUGS = new Set(Object.values(RVB_CAT).concat(
+  ['phase-shifters','flanger','tremolo','preamps','bass-pedals','amp-simulators']));
+/* Reverb subcategory -> my chain category, for classifying live results */
+const RVB_TO_CAT = {
+  'Overdrive and Boost':'od','Distortion':'dist','Fuzz':'fuzz','Delay':'delay',
+  'Reverb':'verb','Chorus and Vibrato':'mod','Phase Shifters':'mod','Flanger':'mod',
+  'Tremolo':'mod','Compression and Sustain':'comp','Octave and Pitch':'pitch',
+  'Wahs and Filters':'filter','Loop Pedals and Samplers':'loop','Tuning Pedals':'tuner',
+  'Multi-Effect Unit':'multi','EQ':'eq','Noise Generators':'util','Preamps':'boost'
+};
+
+async function reverbSearch(opts){
+  const q = new URLSearchParams({product_type:'effects-and-pedals', per_page:String(opts.n||24)});
+  if(opts.query) q.set('query', opts.query);
+  if(opts.cat && RVB_SLUGS.has(RVB_CAT[opts.cat]||opts.cat)) q.set('category', RVB_CAT[opts.cat]||opts.cat);
+  if(opts.min>0)   q.set('price_min', String(opts.min));
+  if(opts.max>0 && opts.max<PMAX) q.set('price_max', String(opts.max));
+  if(opts.cond)    q.set('condition', opts.cond);       /* 'used' | 'new' */
+  const res = await fetch(RVB+'?'+q.toString(), {headers:{'Accept-Version':'3.0'}});
+  if(!res.ok) throw new Error('Reverb returned '+res.status);
+  const d = await res.json();
+  return {total:d.total||0, listings:(d.listings||[]).map(normalizeListing)};
+}
+function normalizeListing(l){
+  const cats  = (l.categories||[]).map(c=>c.full_name||'');
+  const sub   = (cats.find(c=>c.includes(' / '))||'').split(' / ')[1] || '';
+  const photo = ((l.photos||[])[0]||{})._links||{};
+  const make=l.make||'', model=l.model||'';
+  /* sellers often repeat the brand in the model field — don't print it twice */
+  const name = model.toLowerCase().startsWith(make.toLowerCase()) && make ? model
+             : (make ? make+' '+model : model) || l.title || 'Untitled listing';
+  return {
+    id:l.id, make, model, name, title:l.title||'',
+    price: parseFloat((l.price||{}).amount||'0') || 0,
+    display:(l.price||{}).display || '',
+    cond:((l.condition||{}).display_name)||'', year:l.year||'',
+    shop:l.shop_name||'', sub, c: RVB_TO_CAT[sub] || null,
+    img:(photo.large_crop||photo.thumbnail||{}).href||'',
+    url:((l._links||{}).web||{}).href||''
+  };
+}
+/* Watch-a-demo / read-reviews links. Deep links only — no scraping, no
+   fabricated review text; you land on the real results and judge yourself. */
+const demoURL   = (b,n) => 'https://www.youtube.com/results?search_query='+encodeURIComponent(b+' '+n+' demo');
+const reviewURL = (b,n) => 'https://www.google.com/search?q='+encodeURIComponent('"'+b+' '+n+'" pedal review');
+const rvbURL    = (b,n) => 'https://reverb.com/marketplace?query='+encodeURIComponent(b+' '+n)+'&product_type=effects-and-pedals';
+/* Japanese retailers — cheaper for JP-built gear bought domestically */
+const JP_SHOPS = [
+  ['Digimart',   q=>'https://www.digimart.net/search?keywordAll='+encodeURIComponent(q)],
+  ['Sound House',q=>'https://www.soundhouse.co.jp/search/index?sw='+encodeURIComponent(q)],
+  ['Ikebe Gakki',q=>'https://www.ikebe-gakki.com/Form/Product/ProductList.aspx?shop=0&cat=&key='+encodeURIComponent(q)],
+  ['Reverb Japan',q=>'https://reverb.com/marketplace?query='+encodeURIComponent(q)+'&item_region=JP']
+];
+
+/* ===== "DESCRIBE YOUR SOUND" ============================================
+   Two engines behind one box:
+     1. Offline parser (default) — a lexicon of phrases, artists and price
+        expressions. Free, instant, works with no network and no account.
+     2. Claude (optional) — if YOU paste YOUR OWN API key it is used for
+        anything the lexicon misses. Key lives in your browser only.
+======================================================================= */
+const LEX = [
+  /* reference artists & scenes -> the tones those records actually use */
+  [['frank ocean','white ferrari','self control','blonde'],       ['dreamy','washy','lush','warm','ambient']],
+  [['eden','jeremy zucker','sadcore','bedroom pop','lofi indie'], ['dreamy','ambient','washy','lofi','warm']],
+  [['alex g','elliott smith'],                                    ['lofi','warm','vintage','dreamy']],
+  [['shoegaze','slowdive','my bloody valentine','mbv','cocteau'], ['washy','huge','dreamy','wobbly','ambient','extreme']],
+  [['radiohead','jonny greenwood'],                               ['lofi','broken','spacey','extreme']],
+  [['john mayer','srv','stevie ray','blues'],                     ['transparent','warm','crunchy','smooth']],
+  [['hendrix','jimi'],                                            ['fuzzy','swirly','vintage','gritty']],
+  [['nirvana','grunge','smells like teen spirit'],                ['fuzzy','huge','watery','gritty']],
+  [['gilmour','pink floyd','comfortably numb'],                   ['smooth','sustaining','swirly','spacey','dreamy']],
+  [['the edge','u2'],                                             ['shimmering','glassy','spacey','modern']],
+  [['mac demarco','tame impala'],                                 ['wobbly','watery','dreamy','vintage','lofi']],
+  [['ambient','post rock','sigur ros','explosions in the sky'],   ['ambient','washy','huge','shimmering','dreamy']],
+  [['metal','djent','doom','sludge'],                             ['extreme','tight','huge','modern']],
+  [['funk','nile rodgers'],                                       ['punchy','squishy','glassy']],
+  [['jazz','wes montgomery'],                                     ['warm','smooth','dark','transparent']],
+  [['country','nashville','telecaster twang'],                    ['glassy','bright','punchy','transparent']],
+  /* plain descriptions */
+  [['warm','round','fat','thick','creamy','cozy'],                ['warm','smooth']],
+  [['bright','cutting','present','sharp','forward'],              ['bright','glassy']],
+  [['dark','muted','mellow','rolled off','muffled'],              ['dark','warm']],
+  [['glassy','clear','sparkly','sparkle','chime','chimey','bell'],['glassy','shimmering']],
+  [['smooth','polished','silky','even'],                          ['smooth']],
+  [['gritty','raw','hairy','dirty','nasty','rude'],               ['gritty','crunchy']],
+  [['crunchy','crunch','breakup','break up','edge of breakup'],   ['crunchy']],
+  [['fuzzy','fuzz','buzzy','torn','ripped'],                      ['fuzzy']],
+  [['huge','massive','enormous','wall of sound','giant','big'],   ['huge']],
+  [['extreme','insane','over the top','crazy','brutal'],          ['extreme']],
+  [['tight','controlled','focused','articulate'],                 ['tight']],
+  [['punchy','snappy','pop','percussive'],                        ['punchy']],
+  [['sustain','sustaining','hold forever','ring out','endless'],  ['sustaining']],
+  [['dreamy','sad','melancholy','wistful','emotional','pretty','lovely'], ['dreamy','lush']],
+  [['ambient','texture','soundscape','atmospheric','atmosphere','pad'],   ['ambient','washy']],
+  [['washy','washed out','blurry','smeared','smear','drenched','soaked'], ['washy','ambient']],
+  [['spacey','space','distant','far away','otherworldly','cosmic'],       ['spacey']],
+  [['shimmer','shimmering','sparkling','octave up reverb'],       ['shimmering']],
+  [['lush','rich','expensive','hi fi','hifi','studio'],           ['lush','modern']],
+  [['watery','liquid','underwater','swimmy'],                     ['watery']],
+  [['swirl','swirly','sweep','sweeping','whoosh','jet'],          ['swirly']],
+  [['wobbly','warble','seasick','drifting','detuned','out of tune'], ['wobbly']],
+  [['pulse','pulsing','throb','chop','choppy','stutter','rhythmic'], ['pulsing']],
+  [['lofi','lo fi','tape','worn','degraded','old','damaged','vhs'],  ['lofi','vintage']],
+  [['broken','falling apart','sputter','sputtery','gated','glitch','dying battery'], ['broken','extreme']],
+  [['vintage','retro','60s','70s','classic','old school'],        ['vintage']],
+  [['modern','clean','precise','pristine','digital'],             ['modern']],
+  [['transparent','natural','keeps my amp','my amp sound','uncolored','uncoloured'], ['transparent']],
+  [['subtle','gentle','slight','always on','barely'],             ['subtle']],
+  [['squish','squishy','pump','pumping'],                         ['squishy']],
+  [['cheap','budget','affordable','on a budget','not expensive','under budget'], ['budget']],
+  [['mini','small','tiny','save space','space on my board'],      ['small']],
+  [['essential','basic','starter','first pedal','beginner'],      ['essential']]
+];
+const CATWORDS = {
+  tuner:['tuner','tune','tuning'], filter:['wah','filter','envelope','auto wah','quack'],
+  fuzz:['fuzz','muff','fuzz face'], comp:['compressor','compression','comp','squash'],
+  pitch:['octave','pitch','harmoniser','harmonizer','whammy','organ'],
+  od:['overdrive','od','drive','tube screamer','screamer','klon'],
+  dist:['distortion','distort','rat','metal'], boost:['boost','booster','clean boost','lift'],
+  eq:['eq','equalizer','equaliser','graphic eq'], util:['noise gate','gate','noise','hum','buffer'],
+  mod:['chorus','phaser','phase','flanger','tremolo','trem','vibrato','rotary','leslie','univibe','modulation'],
+  delay:['delay','echo','slapback','repeats'], verb:['reverb','verb','room','hall','spring','plate','cave'],
+  multi:['multi effects','multi-effects','multifx','multi fx','all in one'],
+  loop:['looper','loop pedal','loop station']
+};
+/* prices: "under $200", "about 150", "between 100 and 300", "$50-$120" */
+function parsePrice(t){
+  let min=null, max=null, m;
+  if((m=t.match(/(?:between\s*)?\$?(\d{2,4})\s*(?:-|–|to|and)\s*\$?(\d{2,4})/))){
+    min=+m[1]; max=+m[2];
+  } else if((m=t.match(/(?:under|below|less than|max|up to|no more than|cheaper than)\s*\$?(\d{2,4})/))){
+    max=+m[1];
+  } else if((m=t.match(/(?:over|above|at least|more than|minimum)\s*\$?(\d{2,4})/))){
+    min=+m[1];
+  } else if((m=t.match(/(?:around|about|roughly|~|near|circa)\s*\$?(\d{2,4})/))){
+    min=Math.max(0,Math.round(+m[1]*0.7)); max=Math.round(+m[1]*1.35);
+  } else if((m=t.match(/\$(\d{2,4})/))){
+    max=+m[1];
+  }
+  if(min!=null&&max!=null&&min>max){ const s=min; min=max; max=s; }
+  return {min,max};
+}
+function parseSound(text){
+  const t  = ' '+text.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9$~\-\s]/g,' ').replace(/\s+/g,' ')+' ';
+  const tw = t.replace(/-/g,' ').replace(/\s+/g,' ');   /* "lo-fi" -> "lo fi" for word matching */
+  const tones=[], hits=[];
+  for(const [phrases,tags] of LEX){
+    for(const p of phrases){
+      if(tw.includes(' '+p+' ')||tw.includes(' '+p+'s ')){
+        hits.push(p); tags.forEach(x=>{ if(!tones.includes(x)) tones.push(x); }); break;
+      }
+    }
+  }
+  let cat='all', catHit=null, best=0;
+  for(const k of Object.keys(CATWORDS)) for(const w of CATWORDS[k]){
+    if(tw.includes(' '+w+' ')&&w.length>best){ cat=k; catHit=w; best=w.length; }
+  }
+  const {min,max}=parsePrice(t);
+  let ampHit=null;
+  for(const a of AMPS){
+    const n=a.n.toLowerCase();
+    if(tw.includes(' '+n+' ')||(a.b&&tw.includes(' '+a.b.toLowerCase()+' '+n+' '))){ ampHit=a.i; break; }
+  }
+  return {tones:tones.slice(0,8), cat, min, max, hits, catHit, ampHit,
+          understood: tones.length>0 || cat!=='all' || min!=null || max!=null};
+}
+
+/* ---------- optional: your own Claude key ----------------------------- */
+const TONE_IDS = TONES.flatMap(g=>g.t.map(t=>t[0]));
+const AI_SYS =
+ 'You translate a guitarist\'s plain-language description of a sound into filters for a pedal-search app. '+
+ 'Choose only tone tags that genuinely match what they described. If they name an artist or song, infer the '+
+ 'effects actually used on that record. If they give no price, use 0 and 700. Keep "reasoning" to one short '+
+ 'sentence addressed to the player.';
+async function aiParse(text, key){
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model:'claude-opus-5',
+      max_tokens:400,
+      thinking:{type:'disabled'},
+      system:AI_SYS,
+      output_config:{
+        effort:'low',
+        format:{type:'json_schema', schema:{
+          type:'object',
+          properties:{
+            tones:{type:'array', items:{type:'string', enum:TONE_IDS}},
+            category:{type:'string', enum:['all'].concat(Object.keys(CATS))},
+            price_min:{type:'integer'}, price_max:{type:'integer'},
+            reasoning:{type:'string'}
+          },
+          required:['tones','category','price_min','price_max','reasoning'],
+          additionalProperties:false
+        }}
+      },
+      messages:[{role:'user', content:text}]
+    })
+  });
+  if(!res.ok){
+    let m='HTTP '+res.status;
+    try{ const e=await res.json(); m=(e.error&&e.error.message)||m; }catch(_){}
+    throw new Error(m);
+  }
+  const d = await res.json();
+  if(d.stop_reason==='refusal') throw new Error('Claude declined that request.');
+  const blk=(d.content||[]).find(b=>b.type==='text');
+  if(!blk) throw new Error('Empty response from Claude.');
+  const o=JSON.parse(blk.text);
+  return {tones:(o.tones||[]).filter(t=>TONE_IDS.includes(t)).slice(0,8),
+          cat:o.category||'all',
+          min:Number.isFinite(o.price_min)?o.price_min:null,
+          max:Number.isFinite(o.price_max)?o.price_max:null,
+          why:o.reasoning||'', hits:[], catHit:null, ampHit:null, understood:true, viaAI:true};
+}
+
+/* ===== ASK BOX + LIVE MARKET VIEW ====================================== */
+const COUNTRIES = ['all'].concat(Object.keys(ORIGIN));
+
+function askBox(){
+  const n = ST.aiNote;
+  return '<div class="ask">'+
+    '<div class="lbl">Describe the sound you want'+
+      '<span class="r">plain English — reference a song or artist if that is easier</span></div>'+
+    '<div class="askrow">'+
+      '<textarea id="askq" rows="2" placeholder="dreamy and washed out like White Ferrari, under $200&#10;a fuzz that sounds broken and falling apart&#10;warm transparent overdrive for my Crush 12, around $150">'+
+        esc(ST.q||'')+'</textarea>'+
+      '<button class="btn pri" id="askgo">'+(ST.asking?'Thinking…':'Find it')+'</button>'+
+    '</div>'+
+    (n ? '<div class="asknote '+(n.bad?'bad':'')+'">'+
+        (n.viaAI?'<b>Claude</b> ':'<b>Matched</b> ')+esc(n.text)+
+        (n.tones&&n.tones.length?'<span class="asktags">'+n.tones.map(t=>'<i>'+esc(toneLabel(t))+'</i>').join('')+'</span>':'')+
+       '</div>' : '')+
+    '<div class="askfoot">'+
+      (ST.key
+        ? 'Using your Claude key for anything the offline matcher misses. <button class="lnk" id="keyclear">remove key</button>'
+        : 'Runs offline with no account. <button class="lnk" id="keyadd">use my own Claude API key</button> for harder descriptions.')+
+    '</div></div>';
+}
+const toneLabel = id => {
+  for(const g of TONES) for(const t of g.t) if(t[0]===id) return t[1];
+  return id;
+};
+
+async function runAsk(){
+  const el=$('#askq'); const text=(el?el.value:ST.q||'').trim();
+  if(!text) return;
+  ST.q=text; ST.asking=true; render();
+  let r=null, viaAI=false;
+  try{
+    if(ST.key){ r=await aiParse(text, ST.key); viaAI=true; }
+    else { r=parseSound(text); }
+    if(!ST.key && !r.understood) throw new Error('nomatch');
+  }catch(err){
+    if(ST.key){                                  /* fall back rather than fail */
+      r=parseSound(text);
+      if(!r.understood){
+        ST.asking=false;
+        ST.aiNote={bad:true,text:'Claude could not be reached ('+err.message+') and the offline matcher did not recognise anything in that. Try naming a texture — warm, washed out, broken, shimmering.'};
+        return render();
+      }
+      ST.aiNote={text:'Claude was unavailable ('+err.message+') so this used the offline matcher.',tones:r.tones};
+    } else {
+      ST.asking=false;
+      ST.aiNote={bad:true,text:'Nothing in that matched a sound I know. Try a texture (warm, washed out, broken, shimmering), a pedal type, a price, or a song.'};
+      return render();
+    }
+  }
+  const patch={tones:r.tones||[], cat:r.cat||'all', asking:false, open:null, tab:'find'};
+  if(r.min!=null) patch.min=Math.max(0,Math.min(PMAX,r.min));
+  if(r.max!=null) patch.max=Math.max(0,Math.min(PMAX,r.max));
+  if(r.ampHit) patch.amp=r.ampHit;
+  if(!ST.aiNote || !ST.aiNote.bad){
+    ST.aiNote={viaAI, tones:r.tones,
+      text: r.why || describeParse(r)};
+  }
+  go(patch);
+}
+function describeParse(r){
+  const bits=[];
+  if(r.catHit) bits.push('you asked for a '+CATS[r.cat].n.toLowerCase());
+  if(r.hits && r.hits.length) bits.push('picked up “'+r.hits.slice(0,3).join('”, “')+'”');
+  if(r.min!=null||r.max!=null) bits.push('price '+(r.min!=null?money(r.min):'$0')+'–'+(r.max!=null?money(r.max):'any'));
+  if(r.ampHit) bits.push('switched your amp to the '+(AMPS.find(a=>a.i===r.ampHit)||{}).n);
+  return bits.length? bits.join('; ')+'.' : 'filtered on what I could recognise.';
+}
+
+/* ---------- outbound links ------------------------------------------- */
+function linkRow(p){
+  return '<div class="links">'+
+    '<a href="'+demoURL(p.b,p.n)+'" target="_blank" rel="noopener">Watch a demo</a>'+
+    '<a href="'+reviewURL(p.b,p.n)+'" target="_blank" rel="noopener">Reviews</a>'+
+    '<a href="'+rvbURL(p.b,p.n)+'" target="_blank" rel="noopener">Prices on Reverb</a>'+
+    (countryOf(p)==='Japan' ? '<a href="'+JP_SHOPS[0][1](p.b+' '+p.n)+'" target="_blank" rel="noopener">Japanese shops</a>' : '')+
+  '</div>';
+}
+
+/* ---------- MARKET (live Reverb) -------------------------------------- */
+function viewMarket(){
+  const m=ST.mkt||{};
+  const cats=['all'].concat(Object.keys(CATS).filter(c=>RVB_CAT[c]).sort((x,y)=>CATS[x].o-CATS[y].o));
+  const rows=(m.listings||[]).map(l=>{
+    const cat=l.c?CATS[l.c]:null;
+    return '<a class="mrow" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+
+      (l.img?'<img loading="lazy" src="'+esc(l.img)+'" alt="">':'<div class="noimg"></div>')+
+      '<div class="mn"><div class="t">'+esc(l.name)+'</div>'+
+      '<div class="s">'+esc([l.cond,l.year,l.sub].filter(Boolean).join(' · '))+'</div></div>'+
+      (cat?'<div class="ct">'+esc(cat.n)+'</div>':'<div class="ct"></div>')+
+      '<div class="pr">'+esc(l.display||money(l.price))+'</div></a>';
+  }).join('');
+
+  return '<div class="sec"><div class="lbl">Live market'+
+      '<span class="r">real listings on Reverb, updated as you search</span></div>'+
+    '<div class="askrow">'+
+      '<input id="mq" class="mono" placeholder="maxon od808, big muff, shimmer reverb…" value="'+esc(m.q||'')+'">'+
+      '<button class="btn pri" id="mgo">'+(m.loading?'Searching…':'Search')+'</button></div>'+
+    '<div class="chips" style="margin-top:12px">'+cats.map(c=>
+      '<button class="chip" data-mcat="'+c+'" aria-pressed="'+((m.cat||'all')===c)+'">'+
+      (c==='all'?'Everything':esc(CATS[c].n))+'</button>').join('')+'</div>'+
+    '<div class="chips" style="margin-top:8px">'+
+      [['','Any condition'],['used','Used only'],['new','New only']].map(x=>
+      '<button class="chip" data-mcond="'+x[0]+'" aria-pressed="'+((m.cond||'')===x[0])+'">'+x[1]+'</button>').join('')+
+      '<span style="flex:1"></span>'+
+      '<button class="chip" data-mjp="1" aria-pressed="'+(!!m.jp)+'">Japanese builders</button>'+
+    '</div>'+
+    (m.err ? '<div class="notes" style="margin-top:16px"><div class="note warn"><b></b><span>'+
+        esc(m.err)+' The Find, Board and Learn tabs all keep working offline — only this tab needs the network.'+
+      '</span></div></div>' : '')+
+    (m.total!=null && !m.err ? '<div class="sec"><div class="lbl">Results<span class="r">'+
+        m.total.toLocaleString('en-US')+' matching listings'+(m.total>(m.listings||[]).length?' — showing the first '+(m.listings||[]).length:'')+
+      '</span></div><div class="mrows">'+(rows||'<div class="empty">Nothing matched that search.</div>')+'</div></div>' : '')+
+    (m.total==null && !m.err && !m.loading ?
+      '<div class="empty"><b>211,000+ pedals</b>Search any make or model for real current prices. '+
+      'This is the whole marketplace, not my curated list — so there is no amp-fit advice here, just what is actually for sale.</div>' : '')+
+    '<div class="foot">Listings, prices and photos come live from Reverb’s public API and belong to the sellers who posted them. '+
+    'Signal is not affiliated with Reverb, takes no commission, and adds no affiliate tags — every link goes straight to the seller. '+
+    'Prices are whatever the seller is asking right now.</div></div>';
+}
+async function runMarket(patch){
+  ST.mkt=Object.assign({}, ST.mkt, patch||{}, {loading:true, err:null});
+  render();
+  const m=ST.mkt;
+  try{
+    const q=[m.q||'', m.jp?'':''].join(' ').trim();
+    const r=await reverbSearch({query:q||undefined, cat:m.cat==='all'?null:m.cat,
+                                cond:m.cond||null, n:36});
+    let ls=r.listings;
+    if(m.jp){
+      const jp=new Set(ORIGIN.Japan.map(b=>b.toLowerCase()));
+      ls=ls.filter(l=>jp.has((l.make||'').toLowerCase()));
+    }
+    ST.mkt=Object.assign({},ST.mkt,{loading:false, listings:ls, total:m.jp?ls.length:r.total, err:null});
+  }catch(e){
+    ST.mkt=Object.assign({},ST.mkt,{loading:false, err:'Could not reach Reverb ('+e.message+').'});
+  }
+  save(); render();
 }
 
 /* ===== SHELL + WIRING ================================================== */
@@ -1187,13 +1754,13 @@ function applyTheme(){
   if(m) m.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#14070d');
   document.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',b.dataset.th===ST.theme));
 }
-const TABS=[['find','Find'],['board','Board'],['learn','Learn'],['gear','Gear']];
+const TABS=[['find','Find'],['market','Market'],['board','Board'],['learn','Learn'],['gear','Gear']];
 
 function render(){
   document.querySelectorAll('.tb').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===ST.tab));
   const el=$('#main');
-  el.innerHTML = ST.tab==='find'?viewFind() : ST.tab==='board'?viewBoard() :
-                 ST.tab==='learn'?viewLearn() : viewGear();
+  el.innerHTML = ST.tab==='find'?viewFind()   : ST.tab==='market'?viewMarket() :
+                 ST.tab==='board'?viewBoard()  : ST.tab==='learn'?viewLearn() : viewGear();
   if(ST.tab==='find') syncFill();
   window.scrollTo({top:0,behavior:'instant'});
 }
@@ -1203,7 +1770,7 @@ function syncFill(){
   f.style.left=lo+'%'; f.style.width=(hi-lo)+'%';
 }
 function save(){
-  ['tab','theme','amp','tones','cat','min','max','used','board','size'].forEach(k=>store.set(k,ST[k]));
+  ['tab','theme','amp','tones','cat','min','max','used','board','size','country','key','q'].forEach(k=>store.set(k,ST[k]));
 }
 function go(patch){ Object.assign(ST,patch); save(); render(); }
 
@@ -1216,8 +1783,21 @@ function boot(){
   applyTheme(); render();
 
   document.addEventListener('click',e=>{
-    const t=e.target.closest('[data-th],[data-tab],[data-cat],[data-tone],[data-used],[data-add],[data-amp],[data-open],#clrtone,#clrboard');
+    const t=e.target.closest('[data-th],[data-tab],[data-cat],[data-tone],[data-used],[data-add],[data-amp],'+
+      '[data-open],[data-country],[data-mcat],[data-mcond],[data-mjp],'+
+      '#clrtone,#clrboard,#askgo,#mgo,#keyadd,#keyclear,#keyclear2,#keysave');
     if(!t) return;
+    if(t.closest('.links')) return;                       /* let outbound links open */
+
+    if(t.id==='askgo'){ runAsk(); return; }
+    if(t.id==='mgo'){ const b=$('#mq'); runMarket({q:b?b.value.trim():''}); return; }
+    if(t.dataset.mcat!==undefined){ runMarket({cat:t.dataset.mcat}); return; }
+    if(t.dataset.mcond!==undefined){ runMarket({cond:t.dataset.mcond}); return; }
+    if(t.dataset.mjp!==undefined){ runMarket({jp:!ST.mkt.jp}); return; }
+    if(t.dataset.country){ go({country:t.dataset.country, open:null}); return; }
+    if(t.id==='keyadd'){ go({tab:'gear'}); return; }
+    if(t.id==='keyclear'||t.id==='keyclear2'){ go({key:''}); return; }
+    if(t.id==='keysave'){ const b=$('#keyin'); go({key:b?b.value.trim():''}); return; }
 
     if(t.dataset.th){ ST.theme=t.dataset.th; save(); applyTheme(); return; }
     if(t.dataset.tab){ go({tab:t.dataset.tab, open:null}); return; }
@@ -1242,6 +1822,11 @@ function boot(){
   document.addEventListener('change',e=>{
     if(e.target.id==='ampsel') go({amp:e.target.value});
     if(e.target.id==='bsel')   go({size:e.target.value});
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter' && !e.shiftKey && e.target.id==='askq'){ e.preventDefault(); runAsk(); }
+    if(e.key==='Enter' && e.target.id==='mq'){ e.preventDefault(); runMarket({q:e.target.value.trim()}); }
+    if(e.key==='Enter' && e.target.id==='keyin'){ e.preventDefault(); go({key:e.target.value.trim()}); }
   });
 
   document.addEventListener('input',e=>{
